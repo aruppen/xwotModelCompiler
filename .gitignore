@@ -1,0 +1,7 @@
+*.wot
+*.xwot
+*.xsd
+*.wadl
+REST-Servers/
+old_tests/
+*.pyc
