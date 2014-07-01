@@ -80,7 +80,15 @@ class Physical2VirtualEntities:
         ve.setAttribute('name',  name+'Resource')
         uri=raw_input('Specify URI for '+type+' '+name+': ')
         ve.setAttribute('uri',  uri)
-        if type == 'xwot:Device':
+        if type == 'xwot:VDevice':
+            ve.setAttribute('xsi:type',  'xwot:VResource')
+            root.appendChild(ve)
+            physicalEntities = list(self.__filterChildrenByTagName(self.__model.getElementsByTagName('PhysicalEntity')[0],  'Component'))
+            physicalEntities  = self.__searchForContextResources(physicalEntities, newPhysEnt,  ve)
+            for entity in physicalEntities:
+                self.__log.debug('Working on Node: '+entity.getAttribute('name'))
+                self.__addResources(newPhysEnt,  entity,  ve)
+        elif type == 'xwot:Device':
             ve.setAttribute('xsi:type',  'xwot:Resource')
             root.appendChild(ve)
             physicalEntities = list(self.__filterChildrenByTagName(self.__model.getElementsByTagName('PhysicalEntity')[0],  'Component'))
@@ -108,7 +116,15 @@ class Physical2VirtualEntities:
         vent.setAttribute('uri',  uri)
         newTargetPhysicalEntity = sourceNode.cloneNode(False)
         targetPhysicalEntity.appendChild(newTargetPhysicalEntity)
-        if etype == 'xwot:Device':
+        if etype == 'xwot:VDevice':
+            vent.setAttribute('xsi:type',  'xwot:VResource')
+            targetNode.appendChild(vent)
+            subPhysicalEntities = list(self.__filterChildrenByTagName(sourceNode,  'Component'))
+            subPhysicalEntities  = self.__searchForContextResources(subPhysicalEntities, newTargetPhysicalEntity,   vent)
+            for subEntity in subPhysicalEntities:
+                self.__log.debug('Working on Node: '+subEntity.getAttribute('name'))
+                self.__addResources(newTargetPhysicalEntity,  subEntity,  vent)
+        elif etype == 'xwot:Device':
             vent.setAttribute('xsi:type',  'xwot:Resource')
             targetNode.appendChild(vent)
             subPhysicalEntities = list(self.__filterChildrenByTagName(sourceNode,  'Component'))
