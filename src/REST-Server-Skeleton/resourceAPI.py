@@ -24,6 +24,8 @@ except:
     print 'You need the following packages: twisted, autobahn, websocket'
     print 'install them via pip'
     sys.exit()
+from Resource404 import Resource404
+$import
 
 class $classname(resource.Resource):
     """
@@ -50,3 +52,7 @@ class $classname(resource.Resource):
                 request.setHeader("Content-Type",  "application/xml; charset=UTF-8")
                 #return str('<?xml version="1.0"?><measure><temperature units="celsisus" precision="2"> %5.2f</temperature> <timestamp> %d</timestamp></measure>' % (self.data[len(self.data)-1],  time.time()))
                 return str('<?xml version="1.0"?><measure><temperature units="celsisus" precision="2">%5.2f</temperature><humidity units="celsisus" precision="2">%5.2f</humidity><timestamp>%d</timestamp></measure>'% (self.data[len(self.data)-1][0], self.data[len(self.data)-1][1],   time.time()))
+                
+    def getChild(self, name, request):
+        """some comments"""
+        $child

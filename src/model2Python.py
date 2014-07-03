@@ -115,15 +115,35 @@ class Model2Python:
         service_file.close()
         
     def addNodeManagerResourceDefinitions(self,  node,  project_path,  parent_classname):
-        new_parent_classname = self.doAddResourceDefinitions(node,  project_path,  parent_classname)
+        new_parent_filename = self.doAddResourceDefinitions(node,  project_path,  parent_classname)
         for resource in self.getResourceNodes(node):
-            self.addNodeManagerResourceDefinitions(resource,  project_path,  new_parent_classname)
+            filein = open(new_parent_filename)
+            src = string.Template(filein.read())
+            classname=resource.getAttribute('name')+"API"
+            childSubstitute = "if name == '"+resource.getAttribute('uri').replace('{',  '<int:').replace('}',  '>')+"':"+'\n'+"            return "+classname+"(self.datagen, '')"+'\n'+"        $child"
+            importSubstitue = "from "+classname+" import "+classname+'\n'+"$import"
+            d = {'child':childSubstitute,  'import':importSubstitue}
+            #self.__log.debug(childSubstitute)
+            result = src.substitute(d)
+            filein.close()
+            class_file = open(project_path+'/'+node.getAttribute('name')+"API"+'.py',  'w')
+            class_file.write(result)
+            class_file.close()
+            self.addNodeManagerResourceDefinitions(resource,  project_path,  new_parent_filename)
+        filein = open(project_path+'/'+node.getAttribute('name')+"API"+'.py')
+        src = string.Template(filein.read())
+        r = {'classname':'',  'child':'',  'import':''}
+        result = src.substitute(r)
+        filein.close()
+        service_file = open(project_path+'/'+node.getAttribute('name')+"API"+'.py', "w"   )
+        service_file.write(result)
+        service_file.close()
             
     def doAddResourceDefinitions(self, node,  project_path,  parent_classname):
         filein = open(project_path+'/resourceAPI.py')
         src = string.Template(filein.read())
         classname=node.getAttribute('name')+"API"
-        d = {'classname':classname}
+        d = {'classname':classname,  'child':'$child',  'import':'$import'}
         result = src.substitute(d)
         filein.close()
         class_file = open(project_path+'/'+classname+'.py',  'w')
@@ -137,7 +157,8 @@ class Model2Python:
         if parent_classname == "root":
             pathdef = classnameClass+"="+classname+"(data, '')"+'\n        '+parent_classname+".putChild('"+node.getAttribute('uri').replace('{',  '<int:').replace('}',  '>')+"',  "+classnameClass+")"+'\n        $pathdef'
         else:
-            pathdef = classnameClass+"="+classname+"(data, '')"+'\n        '+parent_classname+".putChild('"+node.getAttribute('uri').replace('{',  '<int:').replace('}',  '>')+"',  "+classnameClass+")"+'\n        $pathdef'
+            #pathdef = classnameClass+"="+classname+"(data, '')"+'\n        '+parent_classname+".putChild('"+node.getAttribute('uri').replace('{',  '<int:').replace('}',  '>')+"',  "+classnameClass+")"+'\n        $pathdef'
+            pathdef = ''
         imports = "from "+classname+" import "+classname+'\n'+"$imports"
 
         r = {'imports':imports, 'pathdef':pathdef}
@@ -146,7 +167,7 @@ class Model2Python:
         class_file.write(class_file_in)
         class_file.close()
         filein.close
-        return classnameClass
+        return project_path+'/'+classname+'.py'
     
     def getResourceNodes(self,  parent):
         resources = []
