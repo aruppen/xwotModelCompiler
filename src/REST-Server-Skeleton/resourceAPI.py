@@ -24,7 +24,6 @@ except:
     print 'You need the following packages: twisted, autobahn, websocket'
     print 'install them via pip'
     sys.exit()
-from Resource404 import Resource404
 $import
 
 class $classname(resource.Resource):
