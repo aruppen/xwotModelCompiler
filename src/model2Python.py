@@ -78,12 +78,12 @@ class Model2Python:
         project_name = 'REST-Servers/'+path.replace('/', '_')+'Server'
         self.__log.debug(project_name)
         shutil.copytree('REST-Server-Skeleton',  project_name)
-        self.addResourceDefinitions(source,  project_name,  path.replace('{',  '<int:').replace('}',  '>'))
+        self.addResourceDefinitions(source,  project_name,  "root")
         
         #Some Cleanup
         filein = open(project_name+'/rest-server.py')
         src = string.Template(filein.read())
-        r = {'resourcedef': "",  'pathdef':""}
+        r = {'imports': "",  'pathdef':""}
         result = src.substitute(r)
         filein.close()
         service_file = open(project_name+'/rest-server.py', "w"   )
@@ -91,53 +91,62 @@ class Model2Python:
         #self.__log.debug(result)
         service_file.close()
         
-    def addResourceDefinitions(self,  node,  project_path,  path):
-        self.doAddResourceDefinitions(node,  project_path,  path)
+    def addResourceDefinitions(self,  node,  project_path,  parent_classname):
+        new_parent_classname = self.doAddResourceDefinitions(node,  project_path,  parent_classname)
         for resource in self.getResourceNodes(node):
-            self.addResourceDefinitions(resource,  project_path,  path+resource.getAttribute('uri').replace('{',  '<int:').replace('}',  '>')+'/')
+            self.addResourceDefinitions(resource,  project_path,  new_parent_classname)
         
         
     def createNodeManagerService(self, source,  path):
         project_name = 'REST-Servers/NM-'+path.replace('/', '_')+'Server'
         self.__log.debug(project_name)
         shutil.copytree('REST-Server-Skeleton', project_name)
-        self.addNodeManagerResourceDefinitions(source,  project_name,  path.replace('{',  '<int:').replace('}',  '>'))
+        self.addNodeManagerResourceDefinitions(source,  project_name,  "root")
         
         
         #Some Cleanup
         filein = open(project_name+'/rest-server.py')
         src = string.Template(filein.read())
-        r = {'resourcedef': "",  'pathdef':""}
+        r = {'imports': "",  'pathdef':""}
         result = src.substitute(r)
         filein.close()
         service_file = open(project_name+'/rest-server.py', "w"   )
         service_file.write(result)
-        #self.__log.debug(result)
         service_file.close()
         
-    def addNodeManagerResourceDefinitions(self,  node,  project_path,  path):
-        self.doAddResourceDefinitions(node,  project_path,  path)
+    def addNodeManagerResourceDefinitions(self,  node,  project_path,  parent_classname):
+        new_parent_classname = self.doAddResourceDefinitions(node,  project_path,  parent_classname)
         for resource in self.getResourceNodes(node):
-            self.addNodeManagerResourceDefinitions(resource,  project_path,  path+resource.getAttribute('uri').replace('{',  '<int:').replace('}',  '>')+'/')
+            self.addNodeManagerResourceDefinitions(resource,  project_path,  new_parent_classname)
             
-    def doAddResourceDefinitions(self, node,  project_path,  path):
+    def doAddResourceDefinitions(self, node,  project_path,  parent_classname):
         filein = open(project_path+'/resourceAPI.py')
         src = string.Template(filein.read())
         classname=node.getAttribute('name')+"API"
         d = {'classname':classname}
         result = src.substitute(d)
         filein.close()
+        class_file = open(project_path+'/'+classname+'.py',  'w')
+        class_file.write(result)
+        class_file.close()
         
         filein = open(project_path+'/rest-server.py')
         class_file_in = string.Template(filein.read())
-        result = result + "\n$resourcedef"
-        pathdef = "api.add_resource("+node.getAttribute('name')+"API, '"+path+"')"+'\n$pathdef'
-        r = {'resourcedef': result,  'pathdef':pathdef}
+
+        classnameClass=classname.lower()
+        if parent_classname == "root":
+            pathdef = classnameClass+"="+classname+"(data, '')"+'\n        '+parent_classname+".putChild('"+node.getAttribute('uri').replace('{',  '<int:').replace('}',  '>')+"',  "+classnameClass+")"+'\n        $pathdef'
+        else:
+            pathdef = classnameClass+"="+classname+"(data, '')"+'\n        '+parent_classname+".putChild('"+node.getAttribute('uri').replace('{',  '<int:').replace('}',  '>')+"',  "+classnameClass+")"+'\n        $pathdef'
+        imports = "from "+classname+" import "+classname+'\n'+"$imports"
+
+        r = {'imports':imports, 'pathdef':pathdef}
         class_file_in = class_file_in.substitute(r)
         class_file = open(project_path+'/rest-server.py', "w"   )
         class_file.write(class_file_in)
         class_file.close()
         filein.close
+        return classnameClass
     
     def getResourceNodes(self,  parent):
         resources = []
