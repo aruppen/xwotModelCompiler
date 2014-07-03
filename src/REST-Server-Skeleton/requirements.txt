@@ -1,3 +1,5 @@
 flask>=0.10
 flask-restful>=0.2.3
 Flask-HTTPAuth>=1.0.0
+pyserial
+git+git://github.com/airtonix/avahi-aliases.git

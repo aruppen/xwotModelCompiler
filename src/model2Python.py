@@ -62,7 +62,7 @@ class Model2Python:
         self.__log.debug(node)
         node_type = node.getAttribute('xsi:type')
         resourcePath = path+node.getAttribute('uri')+'/'
-        resourcePath = resourcePath.replace('{',  '<').replace('}',  '>')
+        resourcePath = resourcePath.replace('{',  '<int:').replace('}',  '>')
         if node_type == 'xwot:SensorResource' or  node_type == 'xwot:ActuatorResource' or node_type == 'xwot:ContextResource' or node_type == 'xwot:Resource':
             self.createPythonService(node, resourcePath)
         elif node_type == 'xwot:VResource':
@@ -78,28 +78,21 @@ class Model2Python:
         project_name = 'REST-Servers/'+path.replace('/', '_')+'Server'
         self.__log.debug(project_name)
         shutil.copytree('REST-Server-Skeleton',  project_name)
-        self.addResourceDefinitions(source,  project_name,  path)
+        self.addResourceDefinitions(source,  project_name,  path.replace('{',  '<int:').replace('}',  '>'))
         
-        server_file = open(project_name+'/rest-server.py', "a")
-        server_file.write("if __name__ == '__main__':"+'\n')
-        server_file.write('\t'+"app.run(debug = True)"+'\n')
-        server_file.close()
+        #Some Cleanup
+        filein = open(project_name+'/rest-server.py')
+        src = string.Template(filein.read())
+        r = {'resourcedef': "",  'pathdef':""}
+        result = src.substitute(r)
+        filein.close()
+        service_file = open(project_name+'/rest-server.py', "w"   )
+        service_file.write(result)
+        #self.__log.debug(result)
+        service_file.close()
         
     def addResourceDefinitions(self,  node,  project_path,  path):
-        #server_file = open(project_path+'/rest-server.py', "a")
-        #server_file.write("api.add_resource("+node.getAttribute('name')+"API, '"+path+"')"+'\n')
-        #server_file.close()
-        
-        filein = open(project_path+'/resourceAPI.py')
-        src = string.Template(filein.read())
-        classname=node.getAttribute('name')+"API"
-        d = {'classname':classname}
-        result = src.substitute(d)
-        #class_file = open(project_path+'/'+node.getAttribute('name')+'API', "w")
-        class_file = open(project_path+'/rest-server.py', "a"   )
-        class_file.write(result)
-        class_file.write("api.add_resource("+node.getAttribute('name')+"API, '"+path+"')"+'\n')
-        class_file.close()
+        self.doAddResourceDefinitions(node,  project_path,  path)
         for resource in self.getResourceNodes(node):
             self.addResourceDefinitions(resource,  project_path,  path+resource.getAttribute('uri').replace('{',  '<int:').replace('}',  '>')+'/')
         
@@ -108,31 +101,43 @@ class Model2Python:
         project_name = 'REST-Servers/NM-'+path.replace('/', '_')+'Server'
         self.__log.debug(project_name)
         shutil.copytree('REST-Server-Skeleton', project_name)
-        self.addNodeManagerResourceDefinitions(source,  project_name,  path)
+        self.addNodeManagerResourceDefinitions(source,  project_name,  path.replace('{',  '<int:').replace('}',  '>'))
         
-        server_file = open(project_name+'/rest-server.py', "a")
-        server_file.write("if __name__ == '__main__':"+'\n')
-        server_file.write('\t'+"app.run(debug = True)"+'\n')
-        server_file.close()
+        
+        #Some Cleanup
+        filein = open(project_name+'/rest-server.py')
+        src = string.Template(filein.read())
+        r = {'resourcedef': "",  'pathdef':""}
+        result = src.substitute(r)
+        filein.close()
+        service_file = open(project_name+'/rest-server.py', "w"   )
+        service_file.write(result)
+        #self.__log.debug(result)
+        service_file.close()
         
     def addNodeManagerResourceDefinitions(self,  node,  project_path,  path):
-        #server_file = open(project_path+'/rest-server.py', "a")
-        #server_file.write("api.add_resource("+node.getAttribute('name')+"API, '"+path+"')"+'\n')
-        #server_file.close()
-        
+        self.doAddResourceDefinitions(node,  project_path,  path)
+        for resource in self.getResourceNodes(node):
+            self.addNodeManagerResourceDefinitions(resource,  project_path,  path+resource.getAttribute('uri').replace('{',  '<int:').replace('}',  '>')+'/')
+            
+    def doAddResourceDefinitions(self, node,  project_path,  path):
         filein = open(project_path+'/resourceAPI.py')
         src = string.Template(filein.read())
         classname=node.getAttribute('name')+"API"
         d = {'classname':classname}
         result = src.substitute(d)
-        #class_file = open(project_path+'/'+node.getAttribute('name')+'API', "w")
-        class_file = open(project_path+'/rest-server.py', "a"   )
-        class_file.write(result)
-        class_file.write("api.add_resource("+node.getAttribute('name')+"API, '"+path+"')"+'\n')
+        filein.close()
+        
+        filein = open(project_path+'/rest-server.py')
+        class_file_in = string.Template(filein.read())
+        result = result + "\n$resourcedef"
+        pathdef = "api.add_resource("+node.getAttribute('name')+"API, '"+path+"')"+'\n$pathdef'
+        r = {'resourcedef': result,  'pathdef':pathdef}
+        class_file_in = class_file_in.substitute(r)
+        class_file = open(project_path+'/rest-server.py', "w"   )
+        class_file.write(class_file_in)
         class_file.close()
-        #for resource in self.getNodeManagerResourceNodes(node):
-        for resource in self.getResourceNodes(node):
-            self.addNodeManagerResourceDefinitions(resource,  project_path,  path+resource.getAttribute('uri').replace('{',  '<int:').replace('}',  '>')+'/')
+        filein.close
     
     def getResourceNodes(self,  parent):
         resources = []

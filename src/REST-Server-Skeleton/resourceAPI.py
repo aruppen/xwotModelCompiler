@@ -5,4 +5,9 @@ class $classname(Resource):
         super($classname, self).__init__()
         
     def get(self):
-        return { 'temp': '50'}
+    	data = datagen.next()
+    	accept_type = request.headers.get('Accept')
+    	if accept_type == "application/json":
+        	return { 'temp': data}
+        else:
+        	return data
