@@ -101,7 +101,7 @@ class Model2Python:
         class_file.write("api.add_resource("+node.getAttribute('name')+"API, '"+path+"')"+'\n')
         class_file.close()
         for resource in self.getResourceNodes(node):
-            self.addResourceDefinitions(resource,  project_path,  path+resource.getAttribute('uri').replace('{',  '<').replace('}',  '>')+'/')
+            self.addResourceDefinitions(resource,  project_path,  path+resource.getAttribute('uri').replace('{',  '<int:').replace('}',  '>')+'/')
         
         
     def createNodeManagerService(self, source,  path):
@@ -116,21 +116,23 @@ class Model2Python:
         server_file.close()
         
     def addNodeManagerResourceDefinitions(self,  node,  project_path,  path):
-        server_file = open(project_path+'/rest-server.py', "a")
-        server_file.write("api.add_resource("+node.getAttribute('name')+"API, '"+path+"')"+'\n')
-        server_file.close()
+        #server_file = open(project_path+'/rest-server.py', "a")
+        #server_file.write("api.add_resource("+node.getAttribute('name')+"API, '"+path+"')"+'\n')
+        #server_file.close()
         
         filein = open(project_path+'/resourceAPI.py')
         src = string.Template(filein.read())
         classname=node.getAttribute('name')+"API"
         d = {'classname':classname}
         result = src.substitute(d)
-        class_file = open(project_path+'/'+node.getAttribute('name')+'API', "w")
+        #class_file = open(project_path+'/'+node.getAttribute('name')+'API', "w")
+        class_file = open(project_path+'/rest-server.py', "a"   )
         class_file.write(result)
+        class_file.write("api.add_resource("+node.getAttribute('name')+"API, '"+path+"')"+'\n')
         class_file.close()
         #for resource in self.getNodeManagerResourceNodes(node):
         for resource in self.getResourceNodes(node):
-            self.addNodeManagerResourceDefinitions(resource,  project_path,  path+resource.getAttribute('uri').replace('{',  '<').replace('}',  '>')+'/')
+            self.addNodeManagerResourceDefinitions(resource,  project_path,  path+resource.getAttribute('uri').replace('{',  '<int:').replace('}',  '>')+'/')
     
     def getResourceNodes(self,  parent):
         resources = []
