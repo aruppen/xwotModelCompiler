@@ -5,10 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DHT 11 Sensor</title>
     <link href="/templates/css/application.css?body=1" media="screen" rel="stylesheet" />
-    <link href="/templates/css/foundation_and_overrides.css?body=1" media="screen"
-    rel="stylesheet" />
-    <link href="/templates/css/foundation-icons.css?body=1" media="screen" rel="stylesheet" />
-    <script src="/templates/js/modernizr.js?body=1"></script>
+
+    <link rel="stylesheet" href="/templates/css/foundation.css" />
+    <script src="templates/js/vendor/modernizr.js"></script>
   </head>
   <body>
     <header style="margin-bottom: 20px;">
@@ -69,30 +68,14 @@
         </div>
       </div>
     </div>
-    <script src="/templates/js/jquery.js?body=1"></script>
-    <script src="/templates/js/jquery_ujs.js?body=1"></script>
-    <script src="/templates/js/foundation/foundation.js?body=1"></script>
-    <script src="/templates/js/foundation/foundation.abide.js?body=1"></script>
-    <script src="/templates/js/foundation/foundation.accordion.js?body=1"></script>
-    <script src="/templates/js/foundation/foundation.alert.js?body=1"></script>
-    <script src="/templates/js/foundation/foundation.clearing.js?body=1"></script>
-    <script src="/templates/js/foundation/foundation.dropdown.js?body=1"></script>
-    <script src="/templates/js/foundation/foundation.interchange.js?body=1"></script>
-    <script src="/templates/js/foundation/foundation.joyride.js?body=1"></script>
-    <script src="/templates/js/foundation/foundation.magellan.js?body=1"></script>
-    <script src="/templates/js/foundation/foundation.offcanvas.js?body=1"></script>
-    <script src="/templates/js/foundation/foundation.orbit.js?body=1"></script>
-    <script src="/templates/js/foundation/foundation.reveal.js?body=1"></script>
-    <script src="/templates/js/foundation/foundation.slider.js?body=1"></script>
-    <script src="/templates/js/foundation/foundation.tab.js?body=1"></script>
-    <script src="/templates/js/foundation/foundation.tooltip.js?body=1"></script>
-    <script src="/templates/js/foundation/foundation.topbar.js?body=1"></script>
-    <script src="/templates/js/foundation/foundation.equalizer.js?body=1"></script>
-    <script src="/templates/js/foundation.js?body=1"></script>
-    <script src="/templates/js/application.js?body=1"></script>
   </body>
   <footer style="background-color: #f0f0f0;">
     <div style="text-align: right;">Andreas Ruppen</div>
   </footer>
+      <script src="/templates/js/vendor/jquery.js"></script>
+    <script src="/templates/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+    </script>
 </html>
 

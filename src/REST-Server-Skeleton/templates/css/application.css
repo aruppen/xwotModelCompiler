@@ -34,3 +34,4 @@ footer{
     padding-right: 10px;
 }
 
+$panel-bg: scale-color(#B6FFCD, $lightness: -5%);
