@@ -48,7 +48,6 @@ class Model2Python:
         logging.config.fileConfig('logging.conf')
         self.__log = logging.getLogger('thesis')
 
-        
         self.__log.debug("Reading general configuration from Model2WADL.cfg")
         self.__m2wConfig = ConfigParser.SafeConfigParser()
         self.__m2wConfig.read("Model2WADL.cfg")
@@ -122,8 +121,7 @@ class Model2Python:
         project_name = 'REST-Servers/NM-'+path.replace('/', '_')+'Server'
         self.__log.debug(project_name)
         shutil.copytree('REST-Server-Skeleton', project_name)
-        self.addNodeManagerResourceDefinitions(source,  project_name,  "root")
-        
+        self.addResourceDefinitions(source,  project_name,  "root")
         
         #do some cleanup. Essentially remove template parameters.
         filein = open(project_name+'/rest-server.py')
@@ -132,32 +130,6 @@ class Model2Python:
         result = src.substitute(r)
         filein.close()
         service_file = open(project_name+'/rest-server.py', "w"   )
-        service_file.write(result)
-        service_file.close()
-        
-    def addNodeManagerResourceDefinitions(self,  node,  project_path,  parent_filename):
-        new_parent_filename = self.doAddResourceDefinitions(node,  project_path,  parent_filename)
-        for resource in self.getResourceNodes(node):
-            filein = open(new_parent_filename)
-            src = string.Template(filein.read())
-            classname=resource.getAttribute('name')+"API"
-            childSubstitute = "if name == '"+resource.getAttribute('uri').replace('{',  '<int:').replace('}',  '>')+"':"+'\n'+"            return "+classname+"(self.datagen, '')"+'\n'+"        $child"
-            importSubstitue = "from "+classname+" import "+classname+'\n'+"$import"
-            d = {'child':childSubstitute,  'import':importSubstitue}
-            result = src.substitute(d)
-            filein.close()
-            class_file = open(project_path+'/'+node.getAttribute('name')+"API"+'.py',  'w')
-            class_file.write(result)
-            class_file.close()
-            self.addNodeManagerResourceDefinitions(resource,  project_path,  new_parent_filename)
-        
-        #do some cleanup. Essentially remove template parameters.
-        filein = open(project_path+'/'+node.getAttribute('name')+"API"+'.py')
-        src = string.Template(filein.read())
-        r = {'classname':'',  'child':'',  'import':''}
-        result = src.substitute(r)
-        filein.close()
-        service_file = open(project_path+'/'+node.getAttribute('name')+"API"+'.py', "w"   )
         service_file.write(result)
         service_file.close()
             
@@ -182,19 +154,15 @@ class Model2Python:
         class_file.write(result)
         class_file.close()
         
-        
         # Add the definitions to rest_server.py
         filein = open(project_path+'/rest-server.py')
         class_file_in = string.Template(filein.read())
-
         classnameClass=classname.lower()
         if parent_filename == "root":
             pathdef = classnameClass+"="+classname+"(data, '')"+'\n        '+parent_filename+".putChild('"+node.getAttribute('uri').replace('{',  '<int:').replace('}',  '>')+"',  "+classnameClass+")"+'\n        $pathdef'
         else:
-            #pathdef = classnameClass+"="+classname+"(data, '')"+'\n        '+parent_filename+".putChild('"+node.getAttribute('uri').replace('{',  '<int:').replace('}',  '>')+"',  "+classnameClass+")"+'\n        $pathdef'
             pathdef = ''
         imports = "from "+classname+" import "+classname+'\n'+"$imports"
-
         r = {'imports':imports, 'pathdef':pathdef}
         class_file_in = class_file_in.substitute(r)
         class_file = open(project_path+'/rest-server.py', "w"   )
@@ -208,13 +176,6 @@ class Model2Python:
         resources = []
         for child in parent.childNodes:
             if child.localName == 'Resource':
-                resources.append(child)
-        return resources
-        
-    def getNodeManagerResourceNodes(self,  parent):
-        resources = []
-        for child in parent.childNodes:
-            if child.localName == 'VResource':
                 resources.append(child)
         return resources
             
