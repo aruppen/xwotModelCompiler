@@ -47,85 +47,11 @@ except:
     print 'install them via pip'
     sys.exit()
     
+from WebSocketSupport import wotStreamerProtocol
+from WebSocketSupport import HeartRateBroadcastFactory
+    
 $imports    
 
-
-class wotStreamerProtocol(WebSocketServerProtocol):
-   """
-   Very basic WebSocket Protocol. All clients are accepted. Furthermore received messages are fowarded to all clients.
-   """
-    
-   def onOpen(self):
-      self.factory.register(self)
-
-   def onMessage(self, payload, isBinary):
-      if not isBinary:
-         msg = "{} from {}".format(payload.decode('utf8'), self.peer)
-         self.factory.broadcast(msg)
-
-   def connectionLost(self, reason):
-      WebSocketServerProtocol.connectionLost(self, reason)
-      self.factory.unregister(self)
-
-
-class HeartRateBroadcastFactory(WebSocketServerFactory):
-   """
-   Broadcasts the Temperature at regular intervalls to all connected clients.
-   """
-
-   def __init__(self,  url,  datagen,  debug=False,  debugCodePaths=False):
-        WebSocketServerFactory.__init__(self,  url,  debug = debug,  debugCodePaths = debugCodePaths)
-        self.clients = []
-        self.tickcount = 0
-        self.datagen = datagen
-        self.data = [self.datagen.next_two()]
-        self.lastbroadcast = 0
-        self.tick()
-        self.acquiredata()
-        
-   def acquiredata(self):
-        #measure = round(self.datagen.next_two()[0],  2)
-        localdata = self.datagen.next_two()
-        #pprint(localdata)
-        if isinstance(localdata,  list) and len(localdata)>=2:
-            temp = round(localdata[0],  2)
-            humidity = round(localdata[1],  2)
-        else:
-                temp = -100
-                humidity = -100
-        millis = int(round(time.time() * 1000))
-        if((temp != self.data[len(self.data)-1][0]) or (humidity != self.data[len(self.data)-1][1]) or (millis - self.lastbroadcast)>10000):
-            self.lastbroadcast = millis
-            self.data.append(localdata)
-            try:
-                #self.broadcast('{ "temperature" : %5.2f, "units" : "celsius", "precision" : "2" }' % self.data[len(self.data)-1])
-                #self.broadcast('{"measure": {"temperature": "%5.2f","units": "celsius","precision": "2", "timestamp": "%d"}}' % (self.data[len(self.data)-1],  time.time()))
-                self.broadcast('{"temperature": {"@units": "celsisus","@precision": "2","#text": "%5.2f"},"humidity": {"@units": "celsisus","@precision": "2","#text": "%5.2f"}, "timestamp": "%d"}' % (self.data[len(self.data)-1][0], self.data[len(self.data)-1][1],  time.time()))
-            except TypeError:
-                logging.error("no value") 
-        reactor.callLater(1,  self.acquiredata)
-
-   def tick(self):
-      self.tickcount += 1
-      self.broadcast("tick %d from server" % self.tickcount)
-      reactor.callLater(299, self.tick)
-
-   def register(self, client):
-      if not client in self.clients:
-         logging.debug('registered client ' + client.peer)
-         self.clients.append(client)
-
-   def unregister(self, client):
-      if client in self.clients:
-         logging.debug("unregistered client " + client.peer)
-         self.clients.remove(client)
-
-   def broadcast(self, msg):
-      logging.debug("broadcasting prepared message '{}'".format(msg))
-      preparedMsg = self.prepareMessage(msg)
-      for c in self.clients:
-         c.sendPreparedMessage(preparedMsg)
-         logging.debug("prepared message sent to {}".format(c.peer))
 
 
 class HeartRateMonitor(object):
@@ -236,3 +162,4 @@ if __name__ == '__main__':
     #service.unpublish()
 
    
+

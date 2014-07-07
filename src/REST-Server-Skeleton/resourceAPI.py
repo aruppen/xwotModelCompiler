@@ -24,6 +24,10 @@ except:
     print 'You need the following packages: twisted, autobahn, websocket'
     print 'install them via pip'
     sys.exit()
+    
+from WebSocketSupport import wotStreamerProtocol
+from WebSocketSupport import HeartRateBroadcastFactory
+
 $import
 
 class $classname(resource.Resource):
@@ -36,7 +40,7 @@ class $classname(resource.Resource):
         self.datagen = datagen
     
     def render_GET(self,  request):
-        self.data = [self.datagen.next_two()]
+        self.data = self.datagen.next()
         #pprint(request.__dict__)
         logging.debug(request.requestHeaders)
         accept_type = request.requestHeaders.getRawHeaders("Accept")[0]
@@ -44,14 +48,13 @@ class $classname(resource.Resource):
             if accept_type == "application/json":
                 request.setResponseCode(202)
                 request.setHeader("Content-Type",  "application/json; charset=UTF-8")
-                #return str('{"measure": {"temperature": "%5.2f","units": "celsius","precision": "2", "timestamp": "%d"}}' % (self.data[len(self.data)-1],  time.time()))
-                return str('{"temperature": {"@units": "celsisus","@precision": "2","#text": "%5.2f"},"humidity": {"@units": "celsisus","@precision": "2","#text": "%5.2f"}, "timestamp": "%d"}' % (self.data[len(self.data)-1][0], self.data[len(self.data)-1][1],  time.time()))
+                return str('{"xwot": %s, "timestamp": "%d"}'% (self.data,   time.time()))
             else: #elif accept_type == "application/xml":
                 request.setResponseCode(202)
                 request.setHeader("Content-Type",  "application/xml; charset=UTF-8")
-                #return str('<?xml version="1.0"?><measure><temperature units="celsisus" precision="2"> %5.2f</temperature> <timestamp> %d</timestamp></measure>' % (self.data[len(self.data)-1],  time.time()))
-                return str('<?xml version="1.0"?><measure><temperature units="celsisus" precision="2">%5.2f</temperature><humidity units="celsisus" precision="2">%5.2f</humidity><timestamp>%d</timestamp></measure>'% (self.data[len(self.data)-1][0], self.data[len(self.data)-1][1],   time.time()))
+                return str('<?xml version="1.0"?><xwot>%s</xwot><timestamp>%d</timestamp></measure>'% (self.data,   time.time()))
                 
     def getChild(self, name, request):
         """some comments"""
         $child
+

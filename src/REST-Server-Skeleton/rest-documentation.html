@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Temperature Monitor</title>
+        <style>
+            thead {
+                font-weight: bold;
+                background: #C3E5FF;
+            }
+            thead td {
+                padding: 10px;
+            }
+            table {
+                border-spacing: 1px 35px;
+            }
+            tbody td {
+                vertical-align: top;
+            }
+        </style>
+    </head>
+    <body>
+    <div id="SensorService" class="service">
+        <h1>RESTful API for accessing Temperature Sensors</h1>
+        <p>Here is an overview of what you can do with the Temperature Sensors REST API.</p>
+
+        <table style="width: 100%;">
+            <thead>
+                <tr>
+                    <td>URI</td>
+                    <td>Description</td>
+                    <td>Inpupt/Output</td>
+                    <td>Method</td>
+                    <td>Parameter</td>
+                </tr>
+            </thead>
+
+            <tbody>
+            <div id="TemperatureSocket" class="method">
+            <tr>
+                <td><div id="TemperatureAddress" class="address">ws://localhost:9000/temperature</div></a></td>
+                <td><div id="TemperatureLabel" class="label">WebSocket for listening to the temperature</div></td>
+                <div id="TemperatureOperation" class="operation">
+                <td>
+                    <div id="TemperatureInput" class="input">-</div>/<div id="TemperatureOutput" class="output">JSON</div>
+                </td>
+                <td>GET</td>
+                </div>
+                <td></td>
+            </tr>
+            </div>
+            <div id="TempREST" class="method">
+            <tr>
+                <td><div id="TempAddress" class="address">http://localhost:9000/temp</div></a></td>
+                <td><div id="TempLabel" class="label">REST interface for getting the temperature</div></td>
+                <div id="TempOperation" class="operation">
+                <td>
+                    <div id="TempInput" class="input">-</div>/<div id="TempOutput" class="output">JSON-XML</div>
+                </td>
+                <td>GET</td>
+                </div>
+                <td></td>
+            </tr>
+            </div>
+            </tbody>
+        </table>
+    </div>
+    </body>
+</html>
+

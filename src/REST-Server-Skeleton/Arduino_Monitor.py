@@ -72,9 +72,10 @@ class SerialData(object):
                 
                 #map(float, raw_line.strip().split(','))
                 return raw_line.strip()
-            except ValueError:
+            except ValueError,e:
                 #print 'bogus data',raw_line
-                logging.debug("Value Error: %s", raw_line.strip())
+                logging.debug("Value Error: {0}".format(raw_line.strip()))
+                print str(e)
                 time.sleep(.005)
         return 0.
         
@@ -87,9 +88,10 @@ class SerialData(object):
             try:
                 #logging.debug(raw_line.strip())
                 return map(float, raw_line.strip().split(','))
-            except ValueError:
+            except ValueError,e:
                 #print 'bogus data',raw_line
                 logging.debug("Value Error: %s", raw_line.strip())
+                logging.debug(str(e))
                 time.sleep(.005)
         return [0., 0.]
         
@@ -108,3 +110,4 @@ if __name__=='__main__':
     for i in range(10):
         time.sleep(1)
         print s.next()
+
