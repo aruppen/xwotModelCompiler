@@ -211,11 +211,12 @@ class Physical2VirtualEntities:
     def __doSimplify(self,  resource):
         self.__log.debug('Working on Node: '+resource.getAttribute('name'))
         self.__log.debug('Has '+str(len(resource.childNodes))+' children')
-        if len(resource.childNodes) == 1:
+        if len(resource.childNodes) == 1 and resource.childNodes[0].getAttribute('uri') != 'pub':
             child = resource.childNodes[0].cloneNode(True)
             parent = resource.parentNode
             self.__log.debug('Will replace node '+resource.getAttribute('name')+' with node '+child.getAttribute('name'))
             parent.replaceChild(child,  resource)
+            self.__doSimplify(child)
         else:
             resources = self.__filterChildrenByTagName(resource, 'Resource')
             for r in resources:

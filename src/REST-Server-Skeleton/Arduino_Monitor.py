@@ -11,7 +11,7 @@ import signal
 import sys
 import os
 
-last_received = '-100,-100'
+last_received = '{"temperature":"-100","humidity":"-100"}'
 kill_received = False
 def receiving(ser):
     global last_received

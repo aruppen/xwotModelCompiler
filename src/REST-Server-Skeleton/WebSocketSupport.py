@@ -66,13 +66,19 @@ class HeartRateBroadcastFactory(WebSocketServerFactory):
 
         millis = int(round(time.time() * 1000))
         if((localdata != self.data[len(self.data)-1]) or (millis - self.lastbroadcast)>10000):
-            self.lastbroadcast = millis
-            self.data.append(localdata)
-            try:
-                #self.broadcast('{"temperature": {"@units": "celsisus","@precision": "2","#text": "%5.2f"},"humidity": {"@units": "celsisus","@precision": "2","#text": "%5.2f"}, "timestamp": "%d"}' % (self.data[len(self.data)-1][0], self.data[len(self.data)-1][1],  time.time()))
-                self.broadcast(str('{"xwot": %s, "timestamp": "%d"}'% (self.data[len(self.data)-1], time.time())))
-            except TypeError:
-                logging.error("no value") 
+	        self.lastbroadcast = millis
+	        self.data.append(localdata)
+	        try:
+	            json_data = json.loads(localdata)
+	            #self.broadcast(str('{"xwot": %s, "timestamp": "%d"}'% (self.data[len(self.data)-1], time.time())))
+	            self.broadcast(str('{"temperature": {"@units": "celsisus","@precision": "2","#text": "%5.2f"},"humidity": {"@units": "celsisus","@precision": "2","#text": "%5.2f"}, "timestamp": "%d"}' % (float(json_data['temperature']), float(json_data['humidity']),  time.time())))
+	        except TypeError, e:
+	            logging.error("no value") 
+	            logging.error(e)
+	        except Exception:
+	            logging.error("Something bad happend: ")
+                
+
         reactor.callLater(1,  self.acquiredata)
 
    def tick(self):

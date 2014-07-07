@@ -54,13 +54,14 @@ $imports
 
 
 
-class HeartRateMonitor(object):
+class RestServer(object):
     def __init__(self, port='/dev/ttyACM0', path='/'):
         self.__port = port
         self.__path = path
+        self.__sdelay = 1
         """Do some initialization stuff"""
         logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)s %(message)s',
+                    format='[%(levelname) -7s] %(asctime)s  %(module) -20s:%(lineno)4s %(funcName)-20s %(message)s',
                     filename='sms.log',
                     filemode='w')
         # define a Handler which writes INFO messages or higher to the sys.stderr other are CRITICAL, ERROR, WARNING, INFO, DEBUG, NOTSET
@@ -82,6 +83,7 @@ class HeartRateMonitor(object):
         print ('\033[1;33mWhere option is one of:\033[0m')
         print ('    -p path under which the service is deployed')
         print ('    -d Arduino dev for serial connection')
+        print('     -s Serial delay for the serial connection')
         print ('    -h prints this help')
 
     def getArguments(self, argv):
@@ -90,7 +92,7 @@ class HeartRateMonitor(object):
         #    self.usage()
         #    sys.exit(3)
         try:
-            options, args = getopt.getopt(argv, "p:d:h", ["--help"])
+            options, args = getopt.getopt(argv, "p:d:s:h", ["--help"])
         except getopt.GetoptError:
             self.usage()
             sys.exit(2)
@@ -105,6 +107,9 @@ class HeartRateMonitor(object):
             elif option in ["-d"]:
                 logging.info("Current Arudino dev is: %s", arg)
                 self.__port=arg
+            elif option in ["-s"]:
+                logging.info("Current Delay is: %s", arg)
+                self.__sdelay=arg
             elif option in ["-h"]:
                 self.usage()
                 sys.exit(2)
@@ -124,7 +129,7 @@ class HeartRateMonitor(object):
         service.publish()
         data = DataGen(port=self.__port)
         logging.debug("Peparing Serial Connection. Please stand by...")
-        time.sleep(10)
+        time.sleep(self.__sdelay)
         ServerFactory = HeartRateBroadcastFactory
         factory = ServerFactory("ws://localhost:9000/",  data, debug = False,  debugCodePaths = False)
         factory.protocol = wotStreamerProtocol
@@ -154,7 +159,7 @@ class HeartRateMonitor(object):
 
     
 if __name__ == '__main__':
-    hrm = HeartRateMonitor();
+    hrm = RestServer();
     hrm.getArguments(sys.argv[1:])
     #service = ZeroconfService(name="TestService", port=3000)
     #service.publish()
