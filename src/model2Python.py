@@ -80,7 +80,7 @@ class Model2Python:
         shutil.copytree('REST-Server-Skeleton',  project_name)
         self.addResourceDefinitions(source,  project_name,  "root")
         
-        #Some Cleanup
+        #do some cleanup. Essentially remove template parameters.
         filein = open(project_name+'/rest-server.py')
         src = string.Template(filein.read())
         r = {'imports': "",  'pathdef':""}
@@ -88,13 +88,34 @@ class Model2Python:
         filein.close()
         service_file = open(project_name+'/rest-server.py', "w"   )
         service_file.write(result)
-        #self.__log.debug(result)
         service_file.close()
         
-    def addResourceDefinitions(self,  node,  project_path,  parent_classname):
-        new_parent_classname = self.doAddResourceDefinitions(node,  project_path,  parent_classname)
+    def addResourceDefinitions(self,  node,  project_path,  parent_filename):
+        self.__log.debug("Working on node "+node.getAttribute('name'))
+        new_parent_filename = self.doAddResourceDefinitions(node,  project_path,  parent_filename)
         for resource in self.getResourceNodes(node):
-            self.addResourceDefinitions(resource,  project_path,  new_parent_classname)
+            filein = open(new_parent_filename)
+            src = string.Template(filein.read())
+            classname=resource.getAttribute('name')+"API"
+            childSubstitute = "if name == '"+resource.getAttribute('uri').replace('{',  '<int:').replace('}',  '>')+"':"+'\n'+"            return "+classname+"(self.datagen, '')"+'\n'+"        $child"
+            importSubstitue = "from "+classname+" import "+classname+'\n'+"$import"
+            d = {'child':childSubstitute,  'import':importSubstitue}
+            result = src.substitute(d)
+            filein.close()
+            class_file = open(project_path+'/'+node.getAttribute('name')+"API"+'.py',  'w')
+            class_file.write(result)
+            class_file.close()
+            self.addResourceDefinitions(resource,  project_path,  new_parent_filename)
+            
+        #do some cleanup. Essentially remove template parameters.
+        filein = open(project_path+'/'+node.getAttribute('name')+"API"+'.py')
+        src = string.Template(filein.read())
+        r = {'classname':'',  'child':'',  'import':''}
+        result = src.substitute(r)
+        filein.close()
+        service_file = open(project_path+'/'+node.getAttribute('name')+"API"+'.py', "w"   )
+        service_file.write(result)
+        service_file.close()
         
         
     def createNodeManagerService(self, source,  path):
@@ -104,7 +125,7 @@ class Model2Python:
         self.addNodeManagerResourceDefinitions(source,  project_name,  "root")
         
         
-        #Some Cleanup
+        #do some cleanup. Essentially remove template parameters.
         filein = open(project_name+'/rest-server.py')
         src = string.Template(filein.read())
         r = {'imports': "",  'pathdef':""}
@@ -114,8 +135,8 @@ class Model2Python:
         service_file.write(result)
         service_file.close()
         
-    def addNodeManagerResourceDefinitions(self,  node,  project_path,  parent_classname):
-        new_parent_filename = self.doAddResourceDefinitions(node,  project_path,  parent_classname)
+    def addNodeManagerResourceDefinitions(self,  node,  project_path,  parent_filename):
+        new_parent_filename = self.doAddResourceDefinitions(node,  project_path,  parent_filename)
         for resource in self.getResourceNodes(node):
             filein = open(new_parent_filename)
             src = string.Template(filein.read())
@@ -123,13 +144,14 @@ class Model2Python:
             childSubstitute = "if name == '"+resource.getAttribute('uri').replace('{',  '<int:').replace('}',  '>')+"':"+'\n'+"            return "+classname+"(self.datagen, '')"+'\n'+"        $child"
             importSubstitue = "from "+classname+" import "+classname+'\n'+"$import"
             d = {'child':childSubstitute,  'import':importSubstitue}
-            #self.__log.debug(childSubstitute)
             result = src.substitute(d)
             filein.close()
             class_file = open(project_path+'/'+node.getAttribute('name')+"API"+'.py',  'w')
             class_file.write(result)
             class_file.close()
             self.addNodeManagerResourceDefinitions(resource,  project_path,  new_parent_filename)
+        
+        #do some cleanup. Essentially remove template parameters.
         filein = open(project_path+'/'+node.getAttribute('name')+"API"+'.py')
         src = string.Template(filein.read())
         r = {'classname':'',  'child':'',  'import':''}
@@ -139,25 +161,37 @@ class Model2Python:
         service_file.write(result)
         service_file.close()
             
-    def doAddResourceDefinitions(self, node,  project_path,  parent_classname):
+    def doAddResourceDefinitions(self, node,  project_path,  parent_filename):
         filein = open(project_path+'/resourceAPI.py')
         src = string.Template(filein.read())
         classname=node.getAttribute('name')+"API"
-        d = {'classname':classname,  'child':'$child',  'import':'$import'}
+        if node.getAttribute('uri') == 'pub':
+            childSubstitute = 'ServerFactory = HeartRateBroadcastFactory'+'\n'
+            childSubstitute = childSubstitute + '        '+'factory = ServerFactory("ws://localhost:9000/",  self.datagen, debug = False,  debugCodePaths = False)'+'\n'
+            childSubstitute = childSubstitute + '        '+'factory.protocol = wotStreamerProtocol'+'\n'
+            childSubstitute = childSubstitute + '        '+'factory.setProtocolOptions(allowHixie76 = True)'+'\n'
+            childSubstitute = childSubstitute + '        '+'return WebSocketResource(factory)'+'\n'
+            childSubstitute = childSubstitute + '        '+''+'\n'
+            childSubstitute = childSubstitute + '        '+'$child'+'\n'
+        else:
+            childSubstitute='$child'
+        d = {'classname':classname,  'child':childSubstitute,  'import':'$import'}
         result = src.substitute(d)
         filein.close()
         class_file = open(project_path+'/'+classname+'.py',  'w')
         class_file.write(result)
         class_file.close()
         
+        
+        # Add the definitions to rest_server.py
         filein = open(project_path+'/rest-server.py')
         class_file_in = string.Template(filein.read())
 
         classnameClass=classname.lower()
-        if parent_classname == "root":
-            pathdef = classnameClass+"="+classname+"(data, '')"+'\n        '+parent_classname+".putChild('"+node.getAttribute('uri').replace('{',  '<int:').replace('}',  '>')+"',  "+classnameClass+")"+'\n        $pathdef'
+        if parent_filename == "root":
+            pathdef = classnameClass+"="+classname+"(data, '')"+'\n        '+parent_filename+".putChild('"+node.getAttribute('uri').replace('{',  '<int:').replace('}',  '>')+"',  "+classnameClass+")"+'\n        $pathdef'
         else:
-            #pathdef = classnameClass+"="+classname+"(data, '')"+'\n        '+parent_classname+".putChild('"+node.getAttribute('uri').replace('{',  '<int:').replace('}',  '>')+"',  "+classnameClass+")"+'\n        $pathdef'
+            #pathdef = classnameClass+"="+classname+"(data, '')"+'\n        '+parent_filename+".putChild('"+node.getAttribute('uri').replace('{',  '<int:').replace('}',  '>')+"',  "+classnameClass+")"+'\n        $pathdef'
             pathdef = ''
         imports = "from "+classname+" import "+classname+'\n'+"$imports"
 
@@ -167,6 +201,7 @@ class Model2Python:
         class_file.write(class_file_in)
         class_file.close()
         filein.close
+        
         return project_path+'/'+classname+'.py'
     
     def getResourceNodes(self,  parent):
@@ -206,3 +241,4 @@ class Model2Python:
 if __name__ == "__main__":
     prog = Model2Python()
     prog.getArguments(sys.argv[1:])
+
