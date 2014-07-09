@@ -1,72 +1,284 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-   "http://www.w3.org/TR/html4/loose.dtd">
 
+<!DOCTYPE HTML>
 <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Temperature Monitor</title>
-        <style>
-            thead {
-                font-weight: bold;
-                background: #C3E5FF;
-            }
-            thead td {
-                padding: 10px;
-            }
-            table {
-                border-spacing: 1px 35px;
-            }
-            tbody td {
-                vertical-align: top;
-            }
-        </style>
-    </head>
-    <body>
-    <div id="SensorService" class="service">
-        <h1>RESTful API for accessing Temperature Sensors</h1>
-        <p>Here is an overview of what you can do with the Temperature Sensors REST API.</p>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DHT 11 Sensor</title>
+    <link href="/templates/css/application.css?body=1" media="screen" rel="stylesheet" />
 
-        <table style="width: 100%;">
+    <link rel="stylesheet" href="/templates/css/foundation.css" />
+    <script src="templates/js/vendor/modernizr.js"></script>
+  </head>
+  <body>
+    <header style="margin-bottom: 20px;">
+      <nav class="top-bar">
+        <!-- Area reserved for title -->
+        <ul class="title-area">
+          <li class="name">
+            <h1>
+              <a href="/">
+              <i class="fi-anchor"></i>Arduino Simluator</a>
+            </h1>
+          </li>
+          <li class="toggle-topbar menu-icon">
+            <a>Menu</a>
+          </li>
+        </ul>
+        <section class="top-bar-section">
+          <ul class="left">
+            <li>
+              <a href="/thermistor">Thermistor</a>
+            </li>
+          </ul>
+        </section>
+      </nav>
+      <!-- Error Messages -->
+    </header>
+
+
+
+    <div id="body_content" class="row">
+      <div class="column large-10 large-centered">
+        <div class="row">
+	  	  
+          <table style="width: 100%;">
             <thead>
-                <tr>
-                    <td>URI</td>
-                    <td>Description</td>
-                    <td>Inpupt/Output</td>
-                    <td>Method</td>
-                    <td>Parameter</td>
-                </tr>
-            </thead>
-
-            <tbody>
-            <div id="TemperatureSocket" class="method">
-            <tr>
-                <td><div id="TemperatureAddress" class="address">ws://localhost:9000/temperature</div></a></td>
-                <td><div id="TemperatureLabel" class="label">WebSocket for listening to the temperature</div></td>
-                <div id="TemperatureOperation" class="operation">
-                <td>
-                    <div id="TemperatureInput" class="input">-</div>/<div id="TemperatureOutput" class="output">JSON</div>
-                </td>
-                <td>GET</td>
-                </div>
-                <td></td>
-            </tr>
-            </div>
-            <div id="TempREST" class="method">
-            <tr>
-                <td><div id="TempAddress" class="address">http://localhost:9000/temp</div></a></td>
-                <td><div id="TempLabel" class="label">REST interface for getting the temperature</div></td>
-                <div id="TempOperation" class="operation">
-                <td>
-                    <div id="TempInput" class="input">-</div>/<div id="TempOutput" class="output">JSON-XML</div>
-                </td>
-                <td>GET</td>
-                </div>
-                <td></td>
-            </tr>
-            </div>
+              <tr>
+                <td>URI</td>
+                <td>Description</td>
+                <td>Inpupt/Output</td>
+                <td>Method</td>
+                <td>Parameter</td>
+	      </tr>
+	    </thead>
+	    
+	    <tbody>
+	      <div id="Thermistor" class="method">
+		<tr>
+                  <td><div id="ThermistorAddress" class="address"><a href="thermistor">http://localhost:9000/thermistor</div></a></td>
+		  <td><div id="ThermistorLabel" >A DHT11 Thermistor Sensor</div></td>
+		  <div id="ThermistorOperation" class="operation">
+		    <td>
+		      <div id="ThermistorInput" class="input">-</div>/<div id="ThermistorOutput" class="output">JSON-XML-HTML</div>
+		    </td>
+		    <td><div class="label"> GET</div></td>
+                  </div>
+                  <td></td>
+		</tr>
+              </div>
+	    </tbody>
+          </table>
+	  <table style="width: 100%;">
+            <thead>
+              <tr>
+                <td>URI</td>
+                <td>Description</td>
+                <td>Inpupt/Output</td>
+                <td>Method</td>
+                <td>Parameter</td>
+	      </tr>
+	    </thead>
+	    
+	    <tbody>
+	      <div id="Temperature" class="method">
+		<tr>
+                  <td><div id="TempAddress" class="address"><a href="thermistor/temperature">http://localhost:9000/thermistor/temperature</div></a></td>
+		  <td><div id="TempLabel" >The Temperature as read by the DTH 11 Sensor</div></td>
+		  <div id="TempOperation" class="operation">
+		    <td>
+		      <div id="TempInput" class="input">-</div>/<div id="TempOutput" class="output">JSON-XML-HTML</div>
+		    </td>
+		    <td><div class="label"> GET</div></td>
+                  </div>
+                  <td></td>
+		</tr>
+              </div>
+	      <div id="Humidity" class="method">
+		<tr>
+                  <td><div id="HumAddress" class="address"><a href="thermistor/humidity">http://localhost:9000/thermistor/humidity</div></a></td>
+		  <td><div id="HumLabel" >The Humidity as read by the DTH 11 Sensor</div></td>
+		  <div id="HumOperation" class="operation">
+		    <td>
+		      <div id="HumInput" class="input">-</div>/<div id="HumOutput" class="output">JSON-XML-HTML</div>
+		    </td>
+		    <td><div class="label"> GET</div></td>
+                  </div>
+                  <td></td>
+		</tr>
+              </div>
+	    </tbody>
+          </table>
+	  <table style="width: 100%;">
+            <thead>
+              <tr>
+                <td>URI</td>
+                <td>Description</td>
+                <td>Inpupt/Output</td>
+                <td>Method</td>
+                <td>Parameter</td>
+	      </tr>
+	    </thead>
+	    
+	    <tbody>
+	      <div id="TemperaturePub" class="method">
+		<tr>
+                  <td><div id="TempPubAddress" class="address"><a href="thermistor/temperature/pub">http://localhost:9000/thermistor/temperature/pub</div></a></td>
+		  <td><div id="TempPubLabel" >The Temperature publisher</div></td>
+		  <div id="TempPubOperation" class="operation">
+		    <td>
+		      <div id="TempPubInput" class="input">JSON-</div>/<div id="TempPubOutput" class="output">JSON-XML-HTML</div>
+		    </td>
+		    <td><div class="label">POST</div></td>
+                  </div>
+                  <td></td>
+		</tr>
+              </div>
+	      <div id="TemperaturePub2" class="method">
+		<tr>
+                  <td><div id="TempPub2Address" class="address"><a href="thermistor/temperature/pub">http://localhost:9000/thermistor/temperature/pub</div></a></td>
+		  <td><div id="TempPub2Label" >The Temperature publisher</div></td>
+		  <div id="TempPub2Operation" class="operation">
+		    <td>
+		      <div id="TempPub2Input" class="input">-</div>/<div id="TempPub2Output" class="output">JSON-XML-HTML</div>
+		    </td>
+		    <td><div class="label">GET</div></td>
+                  </div>
+                  <td></td>
+		</tr>
+              </div>
+	      <div id="TemperaturePub3" class="method">
+		<tr>
+                  <td><div id="TempPub3Address" class="address"><a href="thermistor/temperature/pub/{id}">http://localhost:9000/thermistor/temperature/pub/{id}</div></a></td>
+		  <td><div id="TempPub3Label" >Registered Client for the publisher</div></td>
+		  <div id="TempPub3Operation" class="operation">
+		    <td>
+		      <div id="TempPub3Input" class="input">-</div>/<div id="TempPub3Output" class="output">JSON-XML-HTML</div>
+		    </td>
+		    <td><div class="label">GET</div></td>
+                  </div>
+                  <td></td>
+		</tr>
+              </div>
+	      <div id="TemperaturePub4" class="method">
+		<tr>
+                  <td><div id="TempPub4Address" class="address"><a href="thermistor/temperature/pub/{id}">http://localhost:9000/thermistor/temperature/pub/{id}</div></a></td>
+		  <td><div id="TempPub4Label" >Registered Client for the publisher</div></td>
+		  <div id="TempPub4Operation" class="operation">
+		    <td>
+		      <div id="TempPub4Input" class="input">JSON</div>/<div id="TempPub4Output" class="output">JSON-XML-HTML</div>
+		    </td>
+		    <td><div class="label">DELETE</div></td>
+                  </div>
+                  <td></td>
+		</tr>
+              </div>
+	      <div id="TemperaturePub5" class="method">
+		<tr>
+                  <td><div id="TempPub5Address" class="address"><a href="thermistor/temperature/pub/">ws://localhost:9000/thermistor/temperature/pub/</div></a></td>
+		  <td><div id="TempPub5Label" >WebSocket to the Temperature publisher</div></td>
+		  <div id="TempPub5Operation" class="operation">
+		    <td>
+		      <div id="TempPub5Input" class="input">-</div>/<div id="TempPub5Output" class="output">JSON-XML-HTML</div>
+		    </td>
+		    <td><div class="label">WS</div></td>
+                  </div>
+                  <td></td>
+		</tr>
+              </div>
             </tbody>
-        </table>
-    </div>
-    </body>
-</html>
+          </table>
 
+
+	  <table style="width: 100%;">
+            <thead>
+              <tr>
+                <td>URI</td>
+                <td>Description</td>
+                <td>Inpupt/Output</td>
+                <td>Method</td>
+                <td>Parameter</td>
+	      </tr>
+	    </thead>
+	    <tbody>
+	      <div id="HumidityPub" class="method">
+		<tr>
+                  <td><div id="HumPubAddress" class="address"><a href="thermistor/humidity/pub">http://localhost:9000/thermistor/humidity/pub</div></a></td>
+		  <td><div id="HumPubLabel" >The Humerature publisher</div></td>
+		  <div id="HumPubOperation" class="operation">
+		    <td>
+		      <div id="HumPubInput" class="input">JSON-</div>/<div id="HumPubOutput" class="output">JSON-XML-HTML</div>
+		    </td>
+		    <td><div class="label">POST</div></td>
+                  </div>
+                  <td></td>
+		</tr>
+              </div>
+	      <div id="HumeraturePub2" class="method">
+		<tr>
+                  <td><div id="HumPub2Address" class="address"><a href="thermistor/humidity/pub">http://localhost:9000/thermistor/humidity/pub</div></a></td>
+		  <td><div id="HumPub2Label" >The Humidity publisher</div></td>
+		  <div id="HumPub2Operation" class="operation">
+		    <td>
+		      <div id="HumPub2Input" class="input">-</div>/<div id="HumPub2Output" class="output">JSON-XML-HTML</div>
+		    </td>
+		    <td><div class="label">GET</div></td>
+                  </div>
+                  <td></td>
+		</tr>
+              </div>
+	      <div id="HumeraturePub3" class="method">
+		<tr>
+                  <td><div id="HumPub3Address" class="address"><a href="thermistor/humidity/pub/{id}">http://localhost:9000/thermistor/humidity/pub/{id}</div></a></td>
+		  <td><div id="HumPub3Label" >Registered Client for the publisher</div></td>
+		  <div id="HumPub3Operation" class="operation">
+		    <td>
+		      <div id="HumPub3Input" class="input">-</div>/<div id="HumPub3Output" class="output">JSON-XML-HTML</div>
+		    </td>
+		    <td><div class="label">GET</div></td>
+                  </div>
+                  <td></td>
+		</tr>
+              </div>
+	      <div id="HumeraturePub4" class="method">
+		<tr>
+                  <td><div id="HumPub4Address" class="address"><a href="thermistor/humidity/pub/{id}">http://localhost:9000/thermistor/humidity/pub/{id}</div></a></td>
+		  <td><div id="HumPub4Label" >Registered Client for the publisher</div></td>
+		  <div id="HumPub4Operation" class="operation">
+		    <td>
+		      <div id="HumPub4Input" class="input">JSON</div>/<div id="HumPub4Output" class="output">JSON-XML-HTML</div>
+		    </td>
+		    <td><div class="label">DELETE</div></td>
+                  </div>
+                  <td></td>
+		</tr>
+              </div>
+	      <div id="HumeraturePub5" class="method">
+		<tr>
+                  <td><div id="HumPub5Address" class="address"><a href="thermistor/humidity/pub/">ws://localhost:9000/thermistor/humidity/pub/</div></a></td>
+		  <td><div id="HumPub5Label" >WebSocket to the Humidity publisher</div></td>
+		  <div id="HumPub5Operation" class="operation">
+		    <td>
+		      <div id="HumPub5Input" class="input">-</div>/<div id="HumPub5Output" class="output">JSON-XML-HTML</div>
+		    </td>
+		    <td><div class="label">WS</div></td>
+                  </div>
+                  <td></td>
+		</tr>
+              </div>
+            </tbody>
+          </table>
+
+
+	</div>
+      </div>
+    </div>
+
+
+    </body>
+<script src="/templates/js/vendor/jquery.js"></script>
+    <script src="/templates/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+    </script>
+</html>

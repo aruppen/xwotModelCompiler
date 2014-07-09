@@ -34,7 +34,7 @@ class $classname(resource.Resource):
     """
    Simple Handler for the temperature resource. Only responds to GET request in either json or xml format.
     """
-   
+    isLeaf = True
     def __init__(self,  datagen,  messageStore):
         resource.Resource.__init__(self)
         self.datagen = datagen

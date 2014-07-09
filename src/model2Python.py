@@ -137,17 +137,34 @@ class Model2Python:
         filein = open(project_path+'/resourceAPI.py')
         src = string.Template(filein.read())
         classname=node.getAttribute('name')+"API"
+        importsubstitue = '$import'
         if node.getAttribute('uri') == 'pub':
-            childSubstitute = 'ServerFactory = HeartRateBroadcastFactory'+'\n'
-            childSubstitute = childSubstitute + '        '+'factory = ServerFactory("ws://localhost:9000/",  self.datagen, debug = False,  debugCodePaths = False)'+'\n'
-            childSubstitute = childSubstitute + '        '+'factory.protocol = wotStreamerProtocol'+'\n'
-            childSubstitute = childSubstitute + '        '+'factory.setProtocolOptions(allowHixie76 = True)'+'\n'
-            childSubstitute = childSubstitute + '        '+'return WebSocketResource(factory)'+'\n'
-            childSubstitute = childSubstitute + '        '+''+'\n'
-            childSubstitute = childSubstitute + '        '+'$child'+'\n'
+            publisherclassname = classname.replace('ResourceAPI',  'ClientResourceAPI')
+            childSubstitute = "if name == '':"+'\n'
+            childSubstitute = childSubstitute + '            '+'ServerFactory = HeartRateBroadcastFactory'+'\n'
+            childSubstitute = childSubstitute + '            '+'factory = ServerFactory("ws://localhost:9000/",  self.datagen, debug = False,  debugCodePaths = False)'+'\n'
+            childSubstitute = childSubstitute + '            '+'factory.protocol = wotStreamerProtocol'+'\n'
+            childSubstitute = childSubstitute + '            '+'factory.setProtocolOptions(allowHixie76 = True)'+'\n'
+            childSubstitute = childSubstitute + '            '+'return WebSocketResource(factory)'+'\n'
+            childSubstitute = childSubstitute + '        '+'else:'+'\n'
+            childSubstitute = childSubstitute + '            '+"return "+publisherclassname+"(self.datagen, '')"+'\n'
+            childSubstitute = childSubstitute + '            '+''+'\n'
+            childSubstitute = childSubstitute + '            '+'$child'+'\n'
+            
+            filein2 = open(project_path+'/resourceAPI.py')
+            src2 = string.Template(filein.read())
+            d = {'classname':publisherclassname,  'child':'',  'import':''}
+            result = src.substitute(d)
+            filein2.close()
+            class_file = open(project_path+'/'+publisherclassname+'.py',  'w')
+            class_file.write(result)
+            class_file.close()
+            
+            importsubstitue='from '+publisherclassname+' import '+publisherclassname+'\n'
+            importsubstitue = importsubstitue + '$import'
         else:
             childSubstitute='$child'
-        d = {'classname':classname,  'child':childSubstitute,  'import':'$import'}
+        d = {'classname':classname,  'child':childSubstitute,  'import':importsubstitue}
         result = src.substitute(d)
         filein.close()
         class_file = open(project_path+'/'+classname+'.py',  'w')
