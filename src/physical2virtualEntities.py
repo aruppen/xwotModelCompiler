@@ -33,7 +33,6 @@ else:
 import xml.dom.minidom
 import argparse
 import codecs
-import shutil
 
 
 class Physical2VirtualEntities:
@@ -55,6 +54,9 @@ class Physical2VirtualEntities:
         self.__baseURI = self.__m2wConfig.get("Config", "baseURI")
         self.__basePackage = self.__m2wConfig.get("Config", "basePackage")
         self.__schemaFile = self.__m2wConfig.get("Config", "schemaFile")
+        self.__model = None
+        self.__input = None
+        self.__output = None
 
     def __setupxWoT(self):
         self.__xwot = xml.dom.minidom.Document()
@@ -67,7 +69,6 @@ class Physical2VirtualEntities:
         rootElement.setAttribute("xmi:version", "2.0")
         self.__xwot.appendChild(rootElement)
 
-
     def __createVirtualEntities(self):
         """For each physical device a virtual counterpart is created. Since some combinations of Sensor/Actuator result in a Context resource, the user is asked for some input"""
         root = self.__xwot.documentElement
@@ -76,12 +77,12 @@ class Physical2VirtualEntities:
         physicalEntity = self.__model.getElementsByTagName('PhysicalEntity')[0]
         newPhysEnt = physicalEntity.cloneNode(False)
         root.appendChild(newPhysEnt)
-        type = physicalEntity.getAttribute('xsi:type')
+        elType = physicalEntity.getAttribute('xsi:type')
         name = physicalEntity.getAttribute('name')
         ve.setAttribute('name', name + 'Resource')
-        uri = raw_input('Specify URI for ' + type + ' ' + name + ': ')
+        uri = raw_input('Specify URI for ' + elType + ' ' + name + ': ')
         ve.setAttribute('uri', uri)
-        if type == 'xwot:VDevice':
+        if elType == 'xwot:VDevice':
             ve.setAttribute('xsi:type', 'xwot:VResource')
             root.appendChild(ve)
             physicalEntities = list(
@@ -90,7 +91,7 @@ class Physical2VirtualEntities:
             for entity in physicalEntities:
                 self.__log.debug('Working on Node: ' + entity.getAttribute('name'))
                 self.__addResources(newPhysEnt, entity, ve)
-        elif type == 'xwot:Device':
+        elif elType == 'xwot:Device':
             ve.setAttribute('xsi:type', 'xwot:Resource')
             root.appendChild(ve)
             physicalEntities = list(
@@ -99,16 +100,15 @@ class Physical2VirtualEntities:
             for entity in physicalEntities:
                 self.__log.debug('Working on Node: ' + entity.getAttribute('name'))
                 self.__addResources(newPhysEnt, entity, ve)
-        elif type == 'xwot:Sensor':
+        elif elType == 'xwot:Sensor':
             ve.setAttribute('xsi:type', 'xwot:SensorResource')
             root.appendChild(ve)
             answer = raw_input('Has this Sensor a publisher? [y/n] ')
             if answer in ('y', 'Y', 'Yes', 'yes', 'YES'):
                 self.__createPublisherResource(ve)
-        elif type == 'xwot:Actuator':
+        elif elType == 'xwot:Actuator':
             ve.setAttribute('xsi:type', 'xwot:ActuatorResource')
             root.appendChild(ve)
-
 
     def __addResources(self, targetPhysicalEntity, sourceNode, targetNode):
         vent = self.__xwot.createElement('Resource')
@@ -152,7 +152,7 @@ class Physical2VirtualEntities:
 
     def __searchForContextResources(self, inputNodeList, targetPhysicalEntity, parentDestinationNode):
         doAskAgain = (True if len(inputNodeList) > 1 else False)
-        while (doAskAgain and len(inputNodeList) > 1):
+        while doAskAgain and len(inputNodeList) > 1:
             print('I have found the following Nodes:')
             self.__printChildren(inputNodeList)
             answer = raw_input('Is there a ContextResource? [y/n]? ')

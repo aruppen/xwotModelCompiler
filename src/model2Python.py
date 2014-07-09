@@ -35,7 +35,6 @@ else:
     import configparser as ConfigParser
 import xml.dom.minidom
 import argparse
-import codecs
 
 
 class Model2Python:
@@ -57,7 +56,8 @@ class Model2Python:
         self.__baseURI = self.__m2wConfig.get("Config", "baseURI")
         self.__basePackage = self.__m2wConfig.get("Config", "basePackage")
         self.__schemaFile = self.__m2wConfig.get("Config", "schemaFile")
-
+        self.__model = None
+        self.__input = None
 
     def createServers(self, node, path):
         self.__log.debug(node)
@@ -119,7 +119,6 @@ class Model2Python:
         service_file.write(result)
         service_file.close()
 
-
     def createNodeManagerService(self, source, path):
         project_name = 'REST-Servers/NM-' + path.replace('/', '_') + 'Server'
         self.__log.debug(project_name)
@@ -164,7 +163,7 @@ class Model2Python:
             class_file.close()
 
             importsubstitue = 'from ' + publisherclassname + ' import ' + publisherclassname + '\n'
-            importsubstitue = importsubstitue + '$import'
+            importsubstitue += '$import'
         else:
             childSubstitute = '$child'
         d = {'classname': classname, 'child': childSubstitute, 'import': importsubstitue}
@@ -189,7 +188,7 @@ class Model2Python:
         class_file = open(project_path + '/rest-server.py', "w")
         class_file.write(class_file_in)
         class_file.close()
-        filein.close
+        filein.close()
 
         return project_path + '/' + classname + '.py'
 
@@ -223,4 +222,3 @@ class Model2Python:
 if __name__ == "__main__":
     prog = Model2Python()
     prog.getArguments(sys.argv[1:])
-

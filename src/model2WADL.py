@@ -54,6 +54,10 @@ class Model2WADL:
         self.__baseURI = self.__m2wConfig.get("Config", "baseURI")
         self.__basePackage = self.__m2wConfig.get("Config", "basePackage")
         self.__schemaFile = self.__m2wConfig.get("Config", "schemaFile")
+        self.__wadl = None
+        self.__model = None
+        self.__input = None
+        self.__output = None
 
     def createXSD(self):
         xsd = xml.dom.minidom.Document()
@@ -92,8 +96,6 @@ class Model2WADL:
         #        typeSafeEnumClassElement.setAttribute('name',  'Status')
         #        bindingElement.appendChild(typeSafeEnumClassElement)
 
-
-
         f = codecs.open(self.__schemaFile, 'w', 'utf-8')
         xsd.writexml(f, indent="", addindent="\t", newl="\n", encoding="UTF-8")
 
@@ -119,16 +121,14 @@ class Model2WADL:
         resources.setAttribute('base', self.__baseURI)
         rootElement.appendChild(resources)
         ve = self.__model.getElementsByTagName('VirtualEntity')[0]
-        ve_type = ve.getAttribute('xsi:type')
+        #ve_type = ve.getAttribute('xsi:type')
         resourcePath = "/" + ve.getAttribute('uri')
         resourceEl = self.__wadl.createElement('resource')
         resourceEl.setAttribute('path', resourcePath)
         resourceEl.setAttribute('id', self.__basePackage + ve.getAttribute('name'))
         resources.appendChild(resourceEl)
         self.addMethods(ve, resourceEl)
-
         self.addResources(ve, resources, resourcePath)
-
         self.__log.debug(self.__wadl.toprettyxml())
         f = codecs.open(self.__output, 'w', 'utf-8')
         self.__wadl.writexml(f, indent="", addindent="\t", newl="\n", encoding="UTF-8")
