@@ -6,3 +6,4 @@ REST-Servers/
 old_tests/
 *.pyc
 *~
+.eric4project/*
