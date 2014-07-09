@@ -1,4 +1,4 @@
-###############################################################################
+# ##############################################################################
 ##
 ##  Copyright (C) 2011-2013 Tavendo GmbH
 ##
@@ -22,11 +22,7 @@ import logging
 import getopt
 import os
 import time
-
-
 import json
-
-
 import socket
 
 from pprint import pprint
@@ -34,24 +30,23 @@ from Arduino_Monitor import SerialData as DataGen
 from ZeroconfigService import ZeroconfService
 
 try:
-    from twisted.web import  resource
+    from twisted.web import resource
     from twisted.internet import reactor
     from twisted.python import log
     from twisted.web.server import Site
     from twisted.web.static import File
-    from autobahn.twisted.resource import WebSocketResource,  HTTPChannelHixie76Aware
+    from autobahn.twisted.resource import WebSocketResource, HTTPChannelHixie76Aware
     from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerProtocol, listenWS
 except:
     print 'Some dependendencies are not met'
     print 'You need the following packages: twisted, autobahn'
     print 'install them via pip'
     sys.exit()
-    
+
 from WebSocketSupport import wotStreamerProtocol
 from WebSocketSupport import HeartRateBroadcastFactory
-    
-$imports    
 
+$imports
 
 
 class RestServer(object):
@@ -61,9 +56,9 @@ class RestServer(object):
         self.__sdelay = 1
         """Do some initialization stuff"""
         logging.basicConfig(level=logging.DEBUG,
-                    format='[%(levelname) -7s] %(asctime)s  %(module) -20s:%(lineno)4s %(funcName)-20s %(message)s',
-                    filename='sms.log',
-                    filemode='w')
+                            format='[%(levelname) -7s] %(asctime)s  %(module) -20s:%(lineno)4s %(funcName)-20s %(message)s',
+                            filename='sms.log',
+                            filemode='w')
         # define a Handler which writes INFO messages or higher to the sys.stderr other are CRITICAL, ERROR, WARNING, INFO, DEBUG, NOTSET
         console = logging.StreamHandler()
         console.setLevel(logging.DEBUG)
@@ -74,12 +69,10 @@ class RestServer(object):
         # add the handler to the root logger
         logging.getLogger('').addHandler(console)
         signal.signal(signal.SIGINT, self.signal_handler)
-        
-        
-    
+
     def usage(self):
         print ('Usage:')
-        print (os.path.basename(sys.argv[0])+' [option] ') 
+        print (os.path.basename(sys.argv[0]) + ' [option] ')
         print ('\033[1;33mWhere option is one of:\033[0m')
         print ('    -p path under which the service is deployed')
         print ('    -d Arduino dev for serial connection')
@@ -103,13 +96,13 @@ class RestServer(object):
 
             if option in ["-p"]:
                 logging.info("Current WS path is: %s", arg)
-                self.__path="/"+arg
+                self.__path = "/" + arg
             elif option in ["-d"]:
                 logging.info("Current Arudino dev is: %s", arg)
-                self.__port=arg
+                self.__port = arg
             elif option in ["-s"]:
                 logging.info("Current Delay is: %s", arg)
-                self.__sdelay=arg
+                self.__sdelay = arg
             elif option in ["-h"]:
                 self.usage()
                 sys.exit(2)
@@ -121,43 +114,34 @@ class RestServer(object):
                 break
         self.run()
 
-        
-        
     def run(self):
-        text_entry = ["User=ruppena", "Location=Fribourg", "Name=Udoo Temperature", "Address=Bvd de Perolles 90, 1700 Fribourg"]
-        service = ZeroconfService(name="Temperature (a) - "+socket.gethostname(),  port=9000,  text=text_entry)
+        text_entry = ["User=ruppena", "Location=Fribourg", "Name=Udoo Temperature",
+                      "Address=Bvd de Perolles 90, 1700 Fribourg"]
+        service = ZeroconfService(name="Temperature (a) - " + socket.gethostname(), port=9000, text=text_entry)
         service.publish()
         data = DataGen(port=self.__port)
         logging.debug("Peparing Serial Connection. Please stand by...")
         time.sleep(self.__sdelay)
         ServerFactory = HeartRateBroadcastFactory
-        factory = ServerFactory("ws://localhost:9000/",  data, debug = False,  debugCodePaths = False)
+        factory = ServerFactory("ws://localhost:9000/", data, debug=False, debugCodePaths=False)
         factory.protocol = wotStreamerProtocol
-        factory.setProtocolOptions(allowHixie76 = True)
-        
-        #listenWS(factory)
-        #webdir = File(".")
-        #web = Site(webdir)
-        #reactor.listenTCP(8080, web)
-        #reactor.run()
-        
-        
+        factory.setProtocolOptions(allowHixie76=True)
+
         ws_resource = WebSocketResource(factory)
         root = File('.')
-        root.indexNames=['rest-documentation.html']
-        root.putChild('temperature',  ws_resource)
+        root.indexNames = ['rest-documentation.html']
+        root.putChild('temperature', ws_resource)
         $pathdef
         site = Site(root)
         #site.protocol = HTTPChannelHixie76Aware # needed if Hixie76 is to be supported
-        reactor.listenTCP(9000,  site)
+        reactor.listenTCP(9000, site)
         reactor.run()
-        
-        
-    def signal_handler(self,  signal,  frame):
+
+
+    def signal_handler(self, signal, frame):
         logging.info('Stopping now')
         sys.exit(0)
 
-    
 if __name__ == '__main__':
     hrm = RestServer();
     hrm.getArguments(sys.argv[1:])
