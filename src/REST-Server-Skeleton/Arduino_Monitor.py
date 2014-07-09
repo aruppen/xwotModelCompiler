@@ -5,11 +5,17 @@ http://stackoverflow.com/questions/1093598/pyserial-how-to-read-last-line-sent-f
 """
 from threading import Thread
 import time
-import serial
 import logging
 import signal
 import sys
 import os
+try:
+    import serial
+except:
+    print 'Some dependendencies are not met'
+    print 'You need to install the pyserial package'
+    print 'install them via pip'
+    sys.exit()
 
 last_received = '{"temperature":"-100","humidity":"-100"}'
 kill_received = False
