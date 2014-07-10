@@ -57,12 +57,10 @@ class SerialData(object):
     def next(self):
         if not self.ser:
             return 100  # return anything so we can test when Arduino isn't connected
-        # return a float value or try a few times until we get one
         for j in range(40):
             raw_line = last_received
             try:
                 # logging.debug(raw_line.strip())
-                # map(float, raw_line.strip().split(','))
                 return raw_line.strip()
             except ValueError, e:
                 # print 'bogus data',raw_line
@@ -70,22 +68,6 @@ class SerialData(object):
                 print str(e)
                 time.sleep(.005)
         return 0.
-
-    def next_two(self):
-        if not self.ser:
-            return [100, 100]  # return anything so we can test when Arduino isn't connected
-        # return a float value or try a few times until we get one
-        for j in range(40):
-            raw_line = last_received
-            try:
-                # logging.debug(raw_line.strip())
-                return map(float, raw_line.strip().split(','))
-            except ValueError, e:
-                # print 'bogus data',raw_line
-                logging.debug("Value Error: %s", raw_line.strip())
-                logging.debug(str(e))
-                time.sleep(.005)
-        return [0., 0.]
 
     def signal_handler(self, signal, frame):
         kill_received = True
