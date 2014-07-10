@@ -1,3 +1,4 @@
+#!/bin/sh
 echo "be sure to install first"
 echo "apt-get install python-avahi python-dbus"
 # Then either use system packges with 
