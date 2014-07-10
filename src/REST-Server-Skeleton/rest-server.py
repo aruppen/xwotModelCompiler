@@ -117,6 +117,8 @@ class RestServer(object):
     def run(self):
         text_entry = ["User=ruppena", "Location=Fribourg", "Name=Udoo Temperature",
                       "Address=Bvd de Perolles 90, 1700 Fribourg"]
+        text_entry = {"User": "ruppena", "Location": "Fribourg", "Name": "Udoo Temperature",
+                      "Address": "Bvd de Perolles 90, 1700 Fribourg"}
         service = ZeroconfService(name="Temperature (a) - " + socket.gethostname(), port=9000, text=text_entry)
         service.publish()
         data = DataGen(port=self.__port)
