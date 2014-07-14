@@ -1,6 +1,7 @@
 #!/bin/sh
 echo "be sure to install first"
-echo "apt-get install python-avahi python-dbus"
+echo "apt-get install libavahi-compat-libdnssd1"
+#echo "apt-get install python-avahi python-dbus"
 # Then either use system packges with 
 #python virtualenv.py --system-site-packages xwot
 
