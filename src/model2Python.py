@@ -141,6 +141,7 @@ class Model2Python:
         classname = node.getAttribute('name') + "API"
         importsubstitue = '$import'
         if node.getAttribute('uri') == 'pub':
+            # set the childSubstitute for the *PublisherResourceAPI class
             publisherclassname = classname.replace('ResourceAPI', 'ClientResourceAPI')
             childSubstitute = "if name == '':" + '\n'
             childSubstitute = childSubstitute + '            ' + 'ServerFactory = HeartRateBroadcastFactory' + '\n'
@@ -153,16 +154,18 @@ class Model2Python:
             childSubstitute = childSubstitute + '            ' + '' + '\n'
             childSubstitute = childSubstitute + '            ' + '$child' + '\n'
 
-            #filein2 = open(project_path + '/resourceAPI.py')
-            #src2 = string.Template(filein.read())
-            d = {'classname': publisherclassname, 'child': '', 'import': ''}
+            # Create the  publisher client class
+            d = {'classname': publisherclassname, 'child': '', 'import': importsubstitue}
             result = src.substitute(d)
             #filein2.close()
             class_file = open(project_path + '/' + publisherclassname + '.py', 'w')
             class_file.write(result)
             class_file.close()
 
+            # set the import for the *PublisherResourceAPI class
             importsubstitue = 'from ' + publisherclassname + ' import ' + publisherclassname + '\n'
+            importsubstitue += "from WebSocketSupport import wotStreamerProtocol" + '\n'
+            importsubstitue += "from WebSocketSupport import HeartRateBroadcastFactory" + '\n'
             importsubstitue += '$import'
         else:
             childSubstitute = '$child'

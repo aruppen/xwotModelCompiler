@@ -122,8 +122,9 @@ class RestServer(object):
         service = ZeroconfService(name="Temperature (a) - " + socket.gethostname(), port=9000, text=text_entry)
         service.publish()
         data = DataGen(port=self.__port)
-        logging.debug("Peparing Serial Connection. Please stand by...")
+        logging.info("Peparing Serial Connection. Please stand by...")
         time.sleep(self.__sdelay)
+        logging.info("Up and Running")
         ServerFactory = HeartRateBroadcastFactory
         factory = ServerFactory("ws://localhost:9000/", data, debug=False, debugCodePaths=False)
         factory.protocol = wotStreamerProtocol
