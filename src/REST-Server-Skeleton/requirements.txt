@@ -1,5 +1,5 @@
 #be sure to install apt-get install libavahi-compat-libdnssd1
-setuptools
+setuptools >= 2.1
 pyserial
 twisted
 autobahn
