@@ -30,9 +30,10 @@ class $classname(resource.Resource):
     """
     isLeaf = False
 
-    def __init__(self, datagen, messageStore):
+    def __init__(self, datagen, port, messageStore):
         resource.Resource.__init__(self)
         self.datagen = datagen
+        self.__port = port
 
     def render_GET(self, request):
         self.data = self.datagen.next()
@@ -42,14 +43,14 @@ class $classname(resource.Resource):
         accept_type = request.requestHeaders.getRawHeaders("Accept")[0]
         if not None:
             if accept_type == "application/json":
-                request.setResponseCode(202)
+                request.setResponseCode(200)
                 request.setHeader("Content-Type", "application/json; charset=UTF-8")
                 #return str('{"xwot": %s, "timestamp": "%d"}'% (self.data,   time.time()))
                 return str(
                     '{"temperature": {"@units": "celsisus","@precision": "2","#text": "%5.2f"},"humidity": {"@units": "celsisus","@precision": "2","#text": "%5.2f"}, "timestamp": "%d"}' % (
                     float(json_data['temperature']), float(json_data['humidity']), time.time()))
             elif accept_type == "application/xml":
-                request.setResponseCode(202)
+                request.setResponseCode(200)
                 request.setHeader("Content-Type", "application/xml; charset=UTF-8")
                 #return str('<?xml version="1.0"?><xwot>%s</xwot><timestamp>%d</timestamp></measure>'% (self.data,   time.time()))
                 return str(

@@ -99,7 +99,7 @@ class Model2Python:
             src = string.Template(filein.read())
             classname = resource.getAttribute('name') + "API"
             childSubstitute = "if name == '" + resource.getAttribute('uri').replace('{', '<int:').replace('}',
-                                                                                                          '>') + "':" + '\n' + "            return " + classname + "(self.datagen, '')" + '\n' + "        $child"
+                                                                                                          '>') + "':" + '\n' + "            return " + classname + "(self.datagen, self.__port, '')" + '\n' + "        $child"
             importSubstitue = "from " + classname + " import " + classname + '\n' + "$import"
             d = {'child': childSubstitute, 'import': importSubstitue}
             result = src.substitute(d)
@@ -145,17 +145,17 @@ class Model2Python:
             publisherclassname = classname.replace('ResourceAPI', 'ClientResourceAPI')
             childSubstitute = "if name == '':" + '\n'
             childSubstitute = childSubstitute + '            ' + 'ServerFactory = HeartRateBroadcastFactory' + '\n'
-            childSubstitute = childSubstitute + '            ' + 'factory = ServerFactory("ws://localhost:9000/",  self.datagen, debug = False,  debugCodePaths = False)' + '\n'
+            childSubstitute = childSubstitute + '            ' + 'factory = ServerFactory("ws://localhost:"+str(self.__port)+"/",  self.datagen, debug = False,  debugCodePaths = False)' + '\n'
             childSubstitute = childSubstitute + '            ' + 'factory.protocol = wotStreamerProtocol' + '\n'
             childSubstitute = childSubstitute + '            ' + 'factory.setProtocolOptions(allowHixie76 = True)' + '\n'
             childSubstitute = childSubstitute + '            ' + 'return WebSocketResource(factory)' + '\n'
             childSubstitute = childSubstitute + '        ' + 'else:' + '\n'
-            childSubstitute = childSubstitute + '            ' + "return " + publisherclassname + "(self.datagen, '')" + '\n'
+            childSubstitute = childSubstitute + '            ' + "return " + publisherclassname + "(self.datagen, self.__port, '')" + '\n'
             childSubstitute = childSubstitute + '            ' + '' + '\n'
             childSubstitute = childSubstitute + '            ' + '$child' + '\n'
 
             # Create the  publisher client class
-            d = {'classname': publisherclassname, 'child': '', 'import': importsubstitue}
+            d = {'classname': publisherclassname, 'child': '', 'import': ''}
             result = src.substitute(d)
             #filein2.close()
             class_file = open(project_path + '/' + publisherclassname + '.py', 'w')
@@ -181,7 +181,7 @@ class Model2Python:
         class_file_in = string.Template(filein.read())
         classnameClass = classname.lower()
         if parent_filename == "root":
-            pathdef = classnameClass + "=" + classname + "(data, '')" + '\n        ' + parent_filename + ".putChild('" + node.getAttribute(
+            pathdef = classnameClass + "=" + classname + "(data, self.__port, '')" + '\n        ' + parent_filename + ".putChild('" + node.getAttribute(
                 'uri').replace('{', '<int:').replace('}', '>') + "',  " + classnameClass + ")" + '\n        $pathdef'
         else:
             pathdef = ''

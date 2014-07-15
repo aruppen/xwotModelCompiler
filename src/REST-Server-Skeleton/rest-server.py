@@ -50,9 +50,9 @@ $imports
 
 
 class RestServer(object):
-    def __init__(self, port='/dev/ttyACM0', path='/'):
+    def __init__(self, device='/dev/ttyACM0', port=9000):
+        self.__device = device
         self.__port = port
-        self.__path = path
         self.__sdelay = 1
         """Do some initialization stuff"""
         logging.basicConfig(level=logging.DEBUG,
@@ -70,7 +70,8 @@ class RestServer(object):
         logging.getLogger('').addHandler(console)
         signal.signal(signal.SIGINT, self.signal_handler)
 
-    def usage(self):
+    @staticmethod
+    def usage():
         print ('Usage:')
         print (os.path.basename(sys.argv[0]) + ' [option] ')
         print ('\033[1;33mWhere option is one of:\033[0m')
@@ -80,10 +81,6 @@ class RestServer(object):
         print ('    -h prints this help')
 
     def getArguments(self, argv):
-        # Parse the command line options
-        #if len(argv) == 0:
-        #    self.usage()
-        #    sys.exit(3)
         try:
             options, args = getopt.getopt(argv, "p:d:s:h", ["--help"])
         except getopt.GetoptError:
@@ -95,14 +92,14 @@ class RestServer(object):
             logging.debug("Passed options are  %s  and args are %s", option, arg)
 
             if option in ["-p"]:
-                logging.info("Current WS path is: %s", arg)
-                self.__path = "/" + arg
+                logging.info("Current WS port is: %s", arg)
+                self.__port = int(arg)
             elif option in ["-d"]:
                 logging.info("Current Arudino dev is: %s", arg)
-                self.__port = arg
+                self.__device = arg
             elif option in ["-s"]:
                 logging.info("Current Delay is: %s", arg)
-                self.__sdelay = arg
+                self.__sdelay = int(arg)
             elif option in ["-h"]:
                 self.usage()
                 sys.exit(2)
@@ -115,18 +112,16 @@ class RestServer(object):
         self.run()
 
     def run(self):
-        text_entry = ["User=ruppena", "Location=Fribourg", "Name=Udoo Temperature",
-                      "Address=Bvd de Perolles 90, 1700 Fribourg"]
         text_entry = {"User": "ruppena", "Location": "Fribourg", "Name": "Udoo Temperature",
                       "Address": "Bvd de Perolles 90, 1700 Fribourg"}
-        service = ZeroconfService(name="Temperature (a) - " + socket.gethostname(), port=9000, text=text_entry)
+        service = ZeroconfService(name="Temperature (a) - " + socket.gethostname(), port=self.__port, text=text_entry)
         service.publish()
-        data = DataGen(port=self.__port)
+        data = DataGen(port=self.__device)
         logging.info("Peparing Serial Connection. Please stand by...")
         time.sleep(self.__sdelay)
         logging.info("Up and Running")
         ServerFactory = HeartRateBroadcastFactory
-        factory = ServerFactory("ws://localhost:9000/", data, debug=False, debugCodePaths=False)
+        factory = ServerFactory("ws://localhost:"+str(self.__port)+"/", data, debug=False, debugCodePaths=False)
         factory.protocol = wotStreamerProtocol
         factory.setProtocolOptions(allowHixie76=True)
 
@@ -137,7 +132,7 @@ class RestServer(object):
         $pathdef
         site = Site(root)
         #site.protocol = HTTPChannelHixie76Aware # needed if Hixie76 is to be supported
-        reactor.listenTCP(9000, site)
+        reactor.listenTCP(self.__port, site)
         reactor.run()
 
 
@@ -146,12 +141,8 @@ class RestServer(object):
         sys.exit(0)
 
 if __name__ == '__main__':
-    hrm = RestServer();
+    hrm = RestServer()
     hrm.getArguments(sys.argv[1:])
-    #service = ZeroconfService(name="TestService", port=3000)
-    #service.publish()
-    #raw_input("Press any key to unpublish the service ")
-    #service.unpublish()
 
    
 
