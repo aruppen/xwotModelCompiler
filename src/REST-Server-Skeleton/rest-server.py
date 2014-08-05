@@ -1,20 +1,27 @@
-# ##############################################################################
-##
-##  Copyright (C) 2011-2013 Tavendo GmbH
-##
-##  Licensed under the Apache License, Version 2.0 (the "License");
-##  you may not use this file except in compliance with the License.
-##  You may obtain a copy of the License at
-##
-##      http://www.apache.org/licenses/LICENSE-2.0
-##
-##  Unless required by applicable law or agreed to in writing, software
-##  distributed under the License is distributed on an "AS IS" BASIS,
-##  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-##  See the License for the specific language governing permissions and
-##  limitations under the License.
-##
-###############################################################################
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# #############################################################################################################
+# REST server component which is deployed on smart devices. This is the main class and entry point #
+# ---------------------------------------------------------------------------------------------------------- #
+#                                                                                                            #
+# Author: Andreas Ruppen                                                                                     #
+# License: GPL                                                                                               #
+# This program is free software; you can redistribute it and/or modify                                       #
+#   it under the terms of the GNU General Public License as published by                                     #
+#   the Free Software Foundation; either version 2 of the License, or                                        #
+#   (at your option) any later version.                                                                      #
+#                                                                                                            #
+#   This program is distributed in the hope that it will be useful,                                          #
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of                                           #
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                                            #
+#   GNU General Public License for more details.                                                             #
+#                                                                                                            #
+#   You should have received a copy of the GNU General Public License                                        #
+#   along with this program; if not, write to the                                                            #
+#   Free Software Foundation, Inc.,                                                                          #
+#   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                                                #
+##############################################################################################################
 
 import sys
 import signal
@@ -24,6 +31,7 @@ import os
 import time
 import json
 import socket
+import argparse
 
 from pprint import pprint
 from Arduino_Monitor import SerialData as DataGen
@@ -81,34 +89,18 @@ class RestServer(object):
         print ('    -h prints this help')
 
     def getArguments(self, argv):
-        try:
-            options, args = getopt.getopt(argv, "p:d:s:h", ["--help"])
-        except getopt.GetoptError:
-            self.usage()
-            sys.exit(2)
+        parser = argparse.ArgumentParser()
+        parser.add_argument("-p", "--port", help="port under which the service is deployed (default 9000)", type=int, default=9000,
+                            required=False)
+        parser.add_argument('-d', '--dev', help='Arduino dev for serial connection (default /dev/ttyACM0)', type=str, default='/dev/ttyACM0',
+                            required=False)
+        parser.add_argument('-s', '--delay', help='Serial delay for the serial connection (default 10)', type=int, default=10,
+                            required=False)
+        args = parser.parse_args(argv)
+        self.__port = args.port
+        self.__device = args.dev
+        self.__sdelay = args.delay
 
-        logging.debug("Parsing options")
-        for option, arg in options:
-            logging.debug("Passed options are  %s  and args are %s", option, arg)
-
-            if option in ["-p"]:
-                logging.info("Current WS port is: %s", arg)
-                self.__port = int(arg)
-            elif option in ["-d"]:
-                logging.info("Current Arudino dev is: %s", arg)
-                self.__device = arg
-            elif option in ["-s"]:
-                logging.info("Current Delay is: %s", arg)
-                self.__sdelay = int(arg)
-            elif option in ["-h"]:
-                self.usage()
-                sys.exit(2)
-        logging.debug("Parsing arguments")
-        for option, arg in options:
-            logging.debug("Passed options are  \"%s\"  and args are \"%s\"", option, arg)
-            if option in ["--help", "-h"]:
-                self.usage()
-                break
         self.run()
 
     def run(self):
