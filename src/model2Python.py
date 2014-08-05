@@ -33,6 +33,7 @@ if float(sys.version[:3]) < 3.0:
     import ConfigParser
 else:
     import configparser as ConfigParser
+from os.path import dirname, join, expanduser
 import xml.dom.minidom
 import argparse
 
@@ -49,9 +50,11 @@ class Model2Python:
         logging.config.fileConfig('logging.conf')
         self.__log = logging.getLogger('thesis')
 
+        INSTALL_DIR = dirname(__file__)
         self.__log.debug("Reading general configuration from Model2WADL.cfg")
         self.__m2wConfig = ConfigParser.SafeConfigParser()
-        self.__m2wConfig.read("Model2WADL.cfg")
+        self.__m2wConfig.read([join(INSTALL_DIR, 'Model2WADL.cfg'), expanduser('~/.Model2WADL.cfg'), 'Model2WADL.cfg' ])
+
         #you could read here parameters of the config file instead of passing them on cmd line
         self.__baseURI = self.__m2wConfig.get("Config", "baseURI")
         self.__basePackage = self.__m2wConfig.get("Config", "basePackage")

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # #############################################################################################################
@@ -30,9 +30,11 @@ if float(sys.version[:3]) < 3.0:
     import ConfigParser
 else:
     import configparser as ConfigParser
+from os.path import dirname, join, expanduser
 import xml.dom.minidom
 import argparse
 import codecs
+from colorama import Fore, Back, Style
 
 
 class Physical2VirtualEntities:
@@ -47,9 +49,10 @@ class Physical2VirtualEntities:
         logging.config.fileConfig('logging.conf')
         self.__log = logging.getLogger('thesis')
 
+        INSTALL_DIR = dirname(__file__)
         self.__log.debug("Reading general configuration from Physical2Virtual.cfg")
         self.__m2wConfig = ConfigParser.SafeConfigParser()
-        self.__m2wConfig.read("Physical2Virtual.cfg")
+        self.__m2wConfig.read([join(INSTALL_DIR, 'Physical2Virtual.cfg'), expanduser('~/.Physical2Virtual.cfg'), 'Physical2Virtual.cfg' ])
 
         self.__baseURI = self.__m2wConfig.get("Config", "baseURI")
         self.__basePackage = self.__m2wConfig.get("Config", "basePackage")
@@ -80,7 +83,7 @@ class Physical2VirtualEntities:
         elType = physicalEntity.getAttribute('xsi:type')
         name = physicalEntity.getAttribute('name')
         ve.setAttribute('name', name + 'Resource')
-        uri = raw_input('Specify URI for ' + elType + ' ' + name + ': ')
+        uri = raw_input('Specify URI for ' + Fore.RED + elType + ' ' + Fore.GREEN + name + Fore.RESET + ': ')
         ve.setAttribute('uri', uri)
         if elType == 'xwot:VDevice':
             ve.setAttribute('xsi:type', 'xwot:VResource')
@@ -103,7 +106,7 @@ class Physical2VirtualEntities:
         elif elType == 'xwot:Sensor':
             ve.setAttribute('xsi:type', 'xwot:SensorResource')
             root.appendChild(ve)
-            answer = raw_input('Has this Sensor a publisher? [y/n] ')
+            answer = raw_input('Has this Sensor a publisher? '+Fore.RED+'[y/n] '+Fore.RESET + '?')
             if answer in ('y', 'Y', 'Yes', 'yes', 'YES'):
                 self.__createPublisherResource(ve)
         elif elType == 'xwot:Actuator':
@@ -115,7 +118,7 @@ class Physical2VirtualEntities:
         ename = sourceNode.getAttribute('name')
         etype = sourceNode.getAttribute('xsi:type')
         vent.setAttribute('name', ename + 'Resource')
-        uri = raw_input('Specify URI for ' + etype + ' ' + ename + ': ')
+        uri = raw_input('Specify URI for ' + Fore.RED + etype + ' ' + Fore.GREEN + ename + Fore.RESET + ': ')
         vent.setAttribute('uri', uri)
         newTargetPhysicalEntity = sourceNode.cloneNode(False)
         targetPhysicalEntity.appendChild(newTargetPhysicalEntity)
@@ -138,7 +141,7 @@ class Physical2VirtualEntities:
         elif etype == 'xwot:Sensor':
             vent.setAttribute('xsi:type', 'xwot:SensorResource')
             targetNode.appendChild(vent)
-            answer = raw_input('Has this Sensor a publisher? [y/n] ')
+            answer = raw_input('Has this Sensor a publisher? '+Fore.RED+'[y/n] '+ Fore.RESET + '?')
             if answer in ('y', 'Y', 'Yes', 'yes', 'YES'):
                 self.__createPublisherResource(vent)
         elif etype == 'xwot:Actuator':
@@ -155,7 +158,7 @@ class Physical2VirtualEntities:
         while doAskAgain and len(inputNodeList) > 1:
             print('I have found the following Nodes:')
             self.__printChildren(inputNodeList)
-            answer = raw_input('Is there a ContextResource? [y/n]? ')
+            answer = raw_input('Is there a ContextResource? '+Fore.RED+'[y/n]'+Fore.RESET+ '?' )
             if answer not in ('y', 'Y', 'Yes', 'yes', 'YES'):
                 doAskAgain = False
                 continue
@@ -184,11 +187,11 @@ class Physical2VirtualEntities:
         ename = firstElement.getAttribute('name') + secondElement.getAttribute('name')
 
         vent.setAttribute('name', ename + 'ContextResource')
-        uri = raw_input('Specify URI for ContextResource ' + ename + ': ')
+        uri = raw_input('Specify URI for ContextResource ' + Fore.GREEN + ename + Fore.RESET + ': ')
         vent.setAttribute('uri', uri)
         vent.setAttribute('xsi:type', 'xwot:ContextResource')
         parentDestinationNode.appendChild(vent)
-        answer = raw_input('Has this ContextResource a publisher? [y/n] ')
+        answer = raw_input('Has this ContextResource a publisher? '+Fore.RED+'[y/n] ' + Fore.RESET + '?')
         if answer in ('y', 'Y', 'Yes', 'yes', 'YES'):
             self.__createPublisherResource(vent)
 
