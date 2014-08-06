@@ -83,7 +83,7 @@ class Model2Python:
         # Todo create unique names for theses
         project_name = 'REST-Servers/' + path.replace('/', '_') + 'Server'
         self.__log.debug(project_name)
-        shutil.copytree(resource_filename(Requirement.parse("XWoT_Model_Translator"), 'etc/REST-Server-Skeleton'), project_name)
+        shutil.copytree(resource_filename(Requirement.parse("XWoT_Model_Translator"), 'src/REST-Server-Skeleton'), project_name)
         self.addResourceDefinitions(source, project_name, "root")
 
         #do some cleanup. Essentially remove template parameters.
