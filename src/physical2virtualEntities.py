@@ -45,14 +45,15 @@ class Physical2VirtualEntities:
 
     def __init__(self):
         """Do some initialization stuff"""
+        INSTALL_DIR = dirname(__file__)
+        CONFIG_DIR = '/etc/Model2WADL/'
         logging.basicConfig(level=logging.ERROR)
-        logging.config.fileConfig('logging.conf')
+        logging.config.fileConfig([join(CONFIG_DIR, 'logging.conf'), expanduser('~/.logging.conf'), 'logging.conf'])
         self.__log = logging.getLogger('thesis')
 
-        INSTALL_DIR = dirname(__file__)
-        self.__log.debug("Reading general configuration from Physical2Virtual.cfg")
+        self.__log.debug("Reading general configuration from Model2WADL.cfg")
         self.__m2wConfig = ConfigParser.SafeConfigParser()
-        self.__m2wConfig.read([join(INSTALL_DIR, 'Physical2Virtual.cfg'), expanduser('~/.Physical2Virtual.cfg'), 'Physical2Virtual.cfg' ])
+        self.__m2wConfig.read([join(CONFIG_DIR, 'Physical2Virtual.cfg'), expanduser('~/.Physical2Virtual.cfg'), 'Physical2Virtual.cfg'])
 
         self.__baseURI = self.__m2wConfig.get("Config", "baseURI")
         self.__basePackage = self.__m2wConfig.get("Config", "basePackage")

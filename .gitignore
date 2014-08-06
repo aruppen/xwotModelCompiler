@@ -9,3 +9,7 @@ old_tests/
 .eric4project/*
 .idea
 *.log
+build/
+dist/
+*.egg-info/
+.SyncIgnore

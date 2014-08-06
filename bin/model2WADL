@@ -1,0 +1,8 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from src.model2WADL import Model2WADL
+import sys
+
+prog = Model2WADL()
+prog.getArguments(sys.argv[1:])
