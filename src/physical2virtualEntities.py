@@ -25,7 +25,7 @@
 import sys
 import logging
 import logging.config
-
+import os
 if float(sys.version[:3]) < 3.0:
     import ConfigParser
 else:
@@ -233,6 +233,7 @@ class Physical2VirtualEntities:
 
     def main(self):
         """The main function"""
+        self.__log.debug("current working directory is: " + os.getcwd())
         self.__log.debug("input File is: " + self.__input)
         self.__log.debug("output File is: " + self.__output)
         self.__setupxWoT()
