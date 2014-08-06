@@ -127,7 +127,7 @@ class Model2Python:
     def createNodeManagerService(self, source, path):
         project_name = 'REST-Servers/NM-' + path.replace('/', '_') + 'Server'
         self.__log.debug(project_name)
-        shutil.copytree('REST-Server-Skeleton', project_name)
+        shutil.copytree(resource_filename(Requirement.parse("XWoT_Model_Translator"), 'src/REST-Server-Skeleton'), project_name)
         self.addResourceDefinitions(source, project_name, "root")
 
         #do some cleanup. Essentially remove template parameters.
