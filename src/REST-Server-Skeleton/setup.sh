@@ -10,6 +10,7 @@ python virtualenv.py xwot
 cp -r /usr/lib/python2.7/dist-packages/avahi/ xwot/lib/python2.7/site-packages/
 cp -r /usr/lib/python2.7/dist-packages/dbus/ xwot/lib/python2.7/site-packages/
 cp -r /usr/lib/python2.7/dist-packages/_dbus_* xwot/lib/python2.7/site-packages/
-
+#update setuptools
+xwot/bin/pip install --upgrade setuptools
 # Finally install the required packages
 xwot/bin/pip install -r requirements.txt
