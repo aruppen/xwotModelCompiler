@@ -4,11 +4,11 @@
 # #############################################################################################################
 # Takes a xwot specification and creates a valid WADL file #
 # ---------------------------------------------------------------------------------------------------------- #
-#                                                                                                            #
+# #
 # Author: Andreas Ruppen                                                                                     #
 # License: GPL                                                                                               #
 # This program is free software; you can redistribute it and/or modify                                       #
-#   it under the terms of the GNU General Public License as published by                                     #
+# it under the terms of the GNU General Public License as published by                                     #
 #   the Free Software Foundation; either version 2 of the License, or                                        #
 #   (at your option) any later version.                                                                      #
 #                                                                                                            #
@@ -32,11 +32,11 @@ import xml.dom.minidom
 import argparse
 from os.path import dirname, join, expanduser
 from pkg_resources import Requirement, resource_filename
+
 if float(sys.version[:3]) < 3.0:
     import ConfigParser
 else:
     import configparser as ConfigParser
-
 
 
 class Model2Python:
@@ -50,12 +50,14 @@ class Model2Python:
         self.__INSTALL_DIR = dirname(__file__)
         self.__CONFIG_DIR = '/etc/Model2WADL/'
         logging.basicConfig(level=logging.ERROR)
-        logging.config.fileConfig([join(self.__CONFIG_DIR, 'logging.conf'), expanduser('~/.logging.conf'), 'logging.conf'])
+        logging.config.fileConfig(
+            [join(self.__CONFIG_DIR, 'logging.conf'), expanduser('~/.logging.conf'), 'logging.conf'])
         self.__log = logging.getLogger('thesis')
 
         self.__log.debug("Reading general configuration from Model2WADL.cfg")
         self.__m2wConfig = ConfigParser.SafeConfigParser()
-        self.__m2wConfig.read([join(self.__CONFIG_DIR, 'Model2WADL.cfg'), expanduser('~/.Model2WADL.cfg'), 'Model2WADL.cfg'])
+        self.__m2wConfig.read(
+            [join(self.__CONFIG_DIR, 'Model2WADL.cfg'), expanduser('~/.Model2WADL.cfg'), 'Model2WADL.cfg'])
 
         #you could read here parameters of the config file instead of passing them on cmd line
         self.__baseURI = self.__m2wConfig.get("Config", "baseURI")
@@ -82,8 +84,9 @@ class Model2Python:
     def createPythonService(self, source, path):
         # Todo create unique names for theses
         project_name = 'REST-Servers/' + path.replace('/', '_') + 'Server'
-        self.__log.info('Creating Server: '+project_name)
-        shutil.copytree(resource_filename(Requirement.parse("XWoT_Model_Translator"), 'src/REST-Server-Skeleton'), project_name)
+        self.__log.info('Creating Server: ' + project_name)
+        shutil.copytree(resource_filename(Requirement.parse("XWoT_Model_Translator"), 'src/REST-Server-Skeleton'),
+                        project_name)
         self.addResourceDefinitions(source, project_name, "root")
 
         #do some cleanup. Essentially remove template parameters.
@@ -126,8 +129,9 @@ class Model2Python:
 
     def createNodeManagerService(self, source, path):
         project_name = 'REST-Servers/NM-' + path.replace('/', '_') + 'Server'
-        self.__log.info('Creating Server: '+project_name)
-        shutil.copytree(resource_filename(Requirement.parse("XWoT_Model_Translator"), 'src/REST-Server-Skeleton'), project_name)
+        self.__log.info('Creating Server: ' + project_name)
+        shutil.copytree(resource_filename(Requirement.parse("XWoT_Model_Translator"), 'src/REST-Server-Skeleton'),
+                        project_name)
         self.addResourceDefinitions(source, project_name, "root")
 
         #do some cleanup. Essentially remove template parameters.
@@ -140,7 +144,8 @@ class Model2Python:
         service_file.write(result)
         service_file.close()
 
-    def doAddResourceDefinitions(self, node, project_path, parent_filename):
+    @staticmethod
+    def doAddResourceDefinitions(node, project_path, parent_filename):
         filein = open(project_path + '/resourceAPI.py')
         src = string.Template(filein.read())
         classname = node.getAttribute('name') + "API"
@@ -200,7 +205,8 @@ class Model2Python:
 
         return project_path + '/' + classname + '.py'
 
-    def getResourceNodes(self, parent):
+    @staticmethod
+    def getResourceNodes(parent):
         resources = []
         for child in parent.childNodes:
             if child.localName == 'Resource':

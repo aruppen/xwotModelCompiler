@@ -4,11 +4,11 @@
 # #############################################################################################################
 # Takes a xwot specification adds the virtual parts #
 # ---------------------------------------------------------------------------------------------------------- #
-#                                                                                                            #
+# #
 # Author: Andreas Ruppen                                                                                     #
 # License: GPL                                                                                               #
 # This program is free software; you can redistribute it and/or modify                                       #
-#   it under the terms of the GNU General Public License as published by                                     #
+# it under the terms of the GNU General Public License as published by                                     #
 #   the Free Software Foundation; either version 2 of the License, or                                        #
 #   (at your option) any later version.                                                                      #
 #                                                                                                            #
@@ -26,15 +26,16 @@ import sys
 import logging
 import logging.config
 import os
-if float(sys.version[:3]) < 3.0:
-    import ConfigParser
-else:
-    import configparser as ConfigParser
-from os.path import dirname, join, expanduser
 import xml.dom.minidom
 import argparse
 import codecs
 from colorama import Fore, Back, Style
+from os.path import dirname, join, expanduser
+
+if float(sys.version[:3]) < 3.0:
+    import ConfigParser
+else:
+    import configparser as ConfigParser
 
 
 class Physical2VirtualEntities:
@@ -53,7 +54,8 @@ class Physical2VirtualEntities:
 
         self.__log.debug("Reading general configuration from Model2WADL.cfg")
         self.__m2wConfig = ConfigParser.SafeConfigParser()
-        self.__m2wConfig.read([join(CONFIG_DIR, 'Physical2Virtual.cfg'), expanduser('~/.Physical2Virtual.cfg'), 'Physical2Virtual.cfg'])
+        self.__m2wConfig.read(
+            [join(CONFIG_DIR, 'Physical2Virtual.cfg'), expanduser('~/.Physical2Virtual.cfg'), 'Physical2Virtual.cfg'])
 
         self.__baseURI = self.__m2wConfig.get("Config", "baseURI")
         self.__basePackage = self.__m2wConfig.get("Config", "basePackage")
@@ -107,7 +109,7 @@ class Physical2VirtualEntities:
         elif elType == 'xwot:Sensor':
             ve.setAttribute('xsi:type', 'xwot:SensorResource')
             root.appendChild(ve)
-            answer = raw_input('Has this Sensor a publisher? '+Fore.RED+'[y/n] '+Fore.RESET + '?')
+            answer = raw_input('Has this Sensor a publisher? ' + Fore.RED + '[y/n] ' + Fore.RESET + '?')
             if answer in ('y', 'Y', 'Yes', 'yes', 'YES'):
                 self.__createPublisherResource(ve)
         elif elType == 'xwot:Actuator':
@@ -142,14 +144,15 @@ class Physical2VirtualEntities:
         elif etype == 'xwot:Sensor':
             vent.setAttribute('xsi:type', 'xwot:SensorResource')
             targetNode.appendChild(vent)
-            answer = raw_input('Has this Sensor a publisher? '+Fore.RED+'[y/n] '+ Fore.RESET + '?')
+            answer = raw_input('Has this Sensor a publisher? ' + Fore.RED + '[y/n] ' + Fore.RESET + '?')
             if answer in ('y', 'Y', 'Yes', 'yes', 'YES'):
                 self.__createPublisherResource(vent)
         elif etype == 'xwot:Actuator':
             vent.setAttribute('xsi:type', 'xwot:ActuatorResource')
             targetNode.appendChild(vent)
 
-    def __filterChildrenByTagName(self, node, tagName):
+    @staticmethod
+    def __filterChildrenByTagName(node, tagName):
         for child in node.childNodes:
             if child.nodeType == child.ELEMENT_NODE and child.tagName == tagName:
                 yield child
@@ -159,7 +162,7 @@ class Physical2VirtualEntities:
         while doAskAgain and len(inputNodeList) > 1:
             print('I have found the following Nodes:')
             self.__printChildren(inputNodeList)
-            answer = raw_input('Is there a ContextResource? '+Fore.RED+'[y/n]'+Fore.RESET+ '?' )
+            answer = raw_input('Is there a ContextResource? ' + Fore.RED + '[y/n]' + Fore.RESET + '?')
             if answer not in ('y', 'Y', 'Yes', 'yes', 'YES'):
                 doAskAgain = False
                 continue
@@ -192,7 +195,7 @@ class Physical2VirtualEntities:
         vent.setAttribute('uri', uri)
         vent.setAttribute('xsi:type', 'xwot:ContextResource')
         parentDestinationNode.appendChild(vent)
-        answer = raw_input('Has this ContextResource a publisher? '+Fore.RED+'[y/n] ' + Fore.RESET + '?')
+        answer = raw_input('Has this ContextResource a publisher? ' + Fore.RED + '[y/n] ' + Fore.RESET + '?')
         if answer in ('y', 'Y', 'Yes', 'yes', 'YES'):
             self.__createPublisherResource(vent)
 
@@ -204,7 +207,8 @@ class Physical2VirtualEntities:
         publisher.setAttribute('uri', 'pub')
         parentDestinationNode.appendChild(publisher)
 
-    def __printChildren(self, nodes):
+    @staticmethod
+    def __printChildren(nodes):
         i = 0
         for node in nodes:
             print(str(i) + ': ' + node.toxml())

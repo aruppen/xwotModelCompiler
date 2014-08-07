@@ -4,7 +4,7 @@
 # #############################################################################################################
 # Takes a xwot specification and creates a valid WADL file #
 # ---------------------------------------------------------------------------------------------------------- #
-#                                                                                                            #
+# #
 # Author: Andreas Ruppen                                                                                     #
 # License: GPL                                                                                               #
 # This program is free software; you can redistribute it and/or modify                                       #
@@ -25,15 +25,15 @@
 import logging
 import logging.config
 import sys
-
+import xml.dom.minidom
+import argparse
+import codecs
+from os.path import dirname, join, expanduser
 if float(sys.version[:3]) < 3.0:
     import ConfigParser
 else:
     import configparser as ConfigParser
-from os.path import dirname, join, expanduser
-import xml.dom.minidom
-import argparse
-import codecs
+
 
 
 class Model2WADL:
@@ -268,7 +268,8 @@ class Model2WADL:
         represenationEl.setAttribute('mediaType', 'text/xml')
         responseEL.appendChild(represenationEl)
 
-    def getResourceNodes(self, parent):
+    @staticmethod
+    def getResourceNodes(parent):
         resources = []
         for child in parent.childNodes:
             if child.localName == 'Resource':
@@ -297,7 +298,6 @@ class Model2WADL:
         except Exception as err:
             self.__log.error("Something went really wrong")
             self.__log.debug(err)
-
 
 
 if __name__ == "__main__":

@@ -7,17 +7,18 @@ def walk_subpkg(name):
     data_files = []
     package_dir = 'src'
     for parent, dirs, files in os.walk(os.path.join(package_dir, name)):
-        sub_dir = os.sep.join(parent.split(os.sep)[1:]) # remove package_dir from the path
+        sub_dir = os.sep.join(parent.split(os.sep)[1:])  # remove package_dir from the path
         for f in files:
             data_files.append(os.path.join(sub_dir, f))
     return data_files
+
 
 packages = ['src']
 scripts = ['bin/model2WADL', 'bin/model2Python', 'bin/physical2virtualEntities']
 cmdclass = {'install_data': install_data}
 data_files = [('/etc/Model2WADL/', ['etc/Model2WADL.cfg', 'etc/Physical2Virtual.cfg', 'etc/logging.conf'])]
 package_data = {'src': ['examples/*'],
-                "src":  [] + walk_subpkg('REST-Server-Skeleton/') + walk_subpkg('examples/')}
+                "src": [] + walk_subpkg('REST-Server-Skeleton/') + walk_subpkg('examples/')}
 
 # except IndexError: pass
 
@@ -29,6 +30,7 @@ package_data = {'src': ['examples/*'],
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
 
 setup(
     name="XWoT Model Translator",
@@ -56,6 +58,6 @@ setup(
         'Operating System :: Microsoft :: Windows',
         'Operating System :: POSIX',
         'Programming Language :: Python',
-        ],
+    ],
     platforms='any',
-    )
+)
