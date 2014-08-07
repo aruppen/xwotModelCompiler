@@ -82,7 +82,7 @@ class Model2Python:
     def createPythonService(self, source, path):
         # Todo create unique names for theses
         project_name = 'REST-Servers/' + path.replace('/', '_') + 'Server'
-        self.__log.debug(project_name)
+        self.__log.info('Creating Server: '+project_name)
         shutil.copytree(resource_filename(Requirement.parse("XWoT_Model_Translator"), 'src/REST-Server-Skeleton'), project_name)
         self.addResourceDefinitions(source, project_name, "root")
 
@@ -126,7 +126,7 @@ class Model2Python:
 
     def createNodeManagerService(self, source, path):
         project_name = 'REST-Servers/NM-' + path.replace('/', '_') + 'Server'
-        self.__log.debug(project_name)
+        self.__log.info('Creating Server: '+project_name)
         shutil.copytree(resource_filename(Requirement.parse("XWoT_Model_Translator"), 'src/REST-Server-Skeleton'), project_name)
         self.addResourceDefinitions(source, project_name, "root")
 
@@ -216,7 +216,13 @@ class Model2Python:
             shutil.rmtree(output_dir)
         os.mkdir(output_dir)
         ve = self.__model.getElementsByTagName('VirtualEntity')[0]
-        self.createServers(ve, '/')
+        try:
+            self.__log.info("Start processing")
+            self.createServers(ve, '/')
+            self.__log.info("Successfully created the necessary service(s)")
+        except Exception as err:
+            self.__log.error("Something went really wrong")
+            self.__log.debug(err)
 
     def getArguments(self, argv):
         parser = argparse.ArgumentParser()

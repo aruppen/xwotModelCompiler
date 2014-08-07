@@ -290,7 +290,14 @@ class Model2WADL:
         args = parser.parse_args(argv)
         self.__input = args.input
         self.__output = args.output
-        self.main()
+        try:
+            self.__log.info("Start processing")
+            self.main()
+            self.__log.info("Successfully created the necessary service(s)")
+        except Exception as err:
+            self.__log.error("Something went really wrong")
+            self.__log.debug(err)
+
 
 
 if __name__ == "__main__":
