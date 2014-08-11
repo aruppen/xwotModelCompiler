@@ -26,12 +26,10 @@
 import sys
 import signal
 import logging
-import os
 import time
 import socket
 import argparse
 
-from pprint import pprint
 from Arduino_Monitor import SerialData as DataGen
 from ZeroconfigService import ZeroconfService
 
@@ -73,16 +71,6 @@ class RestServer(object):
         logging.getLogger('').addHandler(console)
         #signal.signal(signal.SIGINT, self.signal_handler)
 
-    @staticmethod
-    def usage():
-        print ('Usage:')
-        print (os.path.basename(sys.argv[0]) + ' [option] ')
-        print ('\033[1;33mWhere option is one of:\033[0m')
-        print ('    -p path under which the service is deployed')
-        print ('    -d Arduino dev for serial connection')
-        print('     -s Serial delay for the serial connection')
-        print ('    -h prints this help')
-
     def getArguments(self, argv):
         parser = argparse.ArgumentParser()
         parser.add_argument("-p", "--port", help="port under which the service is deployed (default 9000)", type=int, default=9000,
@@ -110,7 +98,6 @@ class RestServer(object):
 
         root = File('.')
         root.indexNames = ['rest-documentation.html']
-        root.putChild('temperature', ws_resource)
         $pathdef
         site = Site(root)
         #site.protocol = HTTPChannelHixie76Aware # needed if Hixie76 is to be supported

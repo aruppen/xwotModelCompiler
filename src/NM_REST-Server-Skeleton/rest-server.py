@@ -84,13 +84,13 @@ class RestServer(object):
         service = ZeroconfService(name="Temperature (a) - " + socket.gethostname(), port=self.__port, text=text_entry)
         service.publish()
         data = ''
-
+        logging.info("Up and Running")
+        
         root = File('.')
         root.indexNames = ['rest-documentation.html']
         $pathdef
         site = Site(root)
         #site.protocol = HTTPChannelHixie76Aware # needed if Hixie76 is to be supported
-        logging.info("Up and Running")
         reactor.listenTCP(self.__port, site)
         reactor.run()
 

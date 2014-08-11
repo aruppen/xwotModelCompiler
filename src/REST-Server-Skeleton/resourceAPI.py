@@ -32,10 +32,13 @@ class $classname(resource.Resource):
 
     def __init__(self, datagen, pathname, port, messageStore):
         resource.Resource.__init__(self)
-        self.datagen = datagen
+        self.__pathname = pathname
         self.__port = port
+        self.datagen = datagen
 
     def render_GET(self, request):
+        """Handles GET requests"""
+        # TODO implement this
         self.data = self.datagen.next()
         json_data = json.loads(self.data)
         # pprint(request.__dict__)
@@ -45,14 +48,14 @@ class $classname(resource.Resource):
             if accept_type == "application/json":
                 request.setResponseCode(200)
                 request.setHeader("Content-Type", "application/json; charset=UTF-8")
-                #return str('{"xwot": %s, "timestamp": "%d"}'% (self.data,   time.time()))
+                # TODO implement JSON response
                 return str(
                     '{"temperature": {"@units": "celsisus","@precision": "2","#text": "%5.2f"},"humidity": {"@units": "celsisus","@precision": "2","#text": "%5.2f"}, "timestamp": "%d"}' % (
                     float(json_data['temperature']), float(json_data['humidity']), time.time()))
             elif accept_type == "application/xml":
                 request.setResponseCode(200)
                 request.setHeader("Content-Type", "application/xml; charset=UTF-8")
-                #return str('<?xml version="1.0"?><xwot>%s</xwot><timestamp>%d</timestamp></measure>'% (self.data,   time.time()))
+                # TODO implement XML response
                 return str(
                     '<?xml version="1.0"?><measure><temperature units="celsisus" precision="2">%5.2f</temperature><humidity units="celsisus" precision="2">%5.2f</humidity><timestamp>%d</timestamp></measure>' % (
                     float(json_data['temperature']), float(json_data['humidity']), time.time()))
@@ -61,6 +64,7 @@ class $classname(resource.Resource):
                 flattenString(request, ExampleElement(json_data['temperature'], json_data['humidity'])).addCallback(
                     request.write)
                 request.finish()
+                # TODO implement HTML response
                 return NOT_DONE_YET
 
     def getChild(self, name, request):
