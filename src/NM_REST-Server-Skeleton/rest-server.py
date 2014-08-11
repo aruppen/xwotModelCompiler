@@ -26,13 +26,9 @@
 import sys
 import signal
 import logging
-import os
-import time
 import socket
 import argparse
 
-from pprint import pprint
-from Arduino_Monitor import SerialData as DataGen
 from ZeroconfigService import ZeroconfService
 
 try:
@@ -53,10 +49,8 @@ $imports
 
 
 class RestServer(object):
-    def __init__(self, device='/dev/ttyACM0', port=9000):
-        self.__device = device
+    def __init__(self, port=9000):
         self.__port = port
-        self.__sdelay = 1
         """Do some initialization stuff"""
         logging.basicConfig(level=logging.DEBUG,
                             format='[%(levelname) -7s] %(asctime)s  %(module) -20s:%(lineno)4s %(funcName)-20s %(message)s',
@@ -73,28 +67,14 @@ class RestServer(object):
         logging.getLogger('').addHandler(console)
         #signal.signal(signal.SIGINT, self.signal_handler)
 
-    @staticmethod
-    def usage():
-        print ('Usage:')
-        print (os.path.basename(sys.argv[0]) + ' [option] ')
-        print ('\033[1;33mWhere option is one of:\033[0m')
-        print ('    -p path under which the service is deployed')
-        print ('    -d Arduino dev for serial connection')
-        print('     -s Serial delay for the serial connection')
-        print ('    -h prints this help')
 
     def getArguments(self, argv):
         parser = argparse.ArgumentParser()
         parser.add_argument("-p", "--port", help="port under which the service is deployed (default 9000)", type=int, default=9000,
                             required=False)
-        parser.add_argument('-d', '--dev', help='Arduino dev for serial connection (default /dev/ttyACM0)', type=str, default='/dev/ttyACM0',
-                            required=False)
-        parser.add_argument('-s', '--delay', help='Serial delay for the serial connection (default 10)', type=int, default=10,
-                            required=False)
         args = parser.parse_args(argv)
         self.__port = args.port
-        self.__device = args.dev
-        self.__sdelay = args.delay
+
 
         self.run()
 
@@ -103,19 +83,17 @@ class RestServer(object):
                       "Address": "Bvd de Perolles 90, 1700 Fribourg"}
         service = ZeroconfService(name="Temperature (a) - " + socket.gethostname(), port=self.__port, text=text_entry)
         service.publish()
-        data = DataGen(port=self.__device)
-        logging.info("Peparing Serial Connection. Please stand by...")
-        time.sleep(self.__sdelay)
-        logging.info("Up and Running")
+        data = ''
 
         root = File('.')
         root.indexNames = ['rest-documentation.html']
-        root.putChild('temperature', ws_resource)
         $pathdef
         site = Site(root)
         #site.protocol = HTTPChannelHixie76Aware # needed if Hixie76 is to be supported
+        logging.info("Up and Running")
         reactor.listenTCP(self.__port, site)
         reactor.run()
+
 
 
     #def signal_handler(self, signal, frame):

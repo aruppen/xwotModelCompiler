@@ -18,7 +18,7 @@ scripts = ['bin/model2WADL', 'bin/model2Python', 'bin/physical2virtualEntities']
 cmdclass = {'install_data': install_data}
 data_files = [('/etc/Model2WADL/', ['etc/Model2WADL.cfg', 'etc/Physical2Virtual.cfg', 'etc/logging.conf'])]
 package_data = {'src': ['examples/*'],
-                "src": [] + walk_subpkg('REST-Server-Skeleton/') + walk_subpkg('examples/')}
+                "src": [] + walk_subpkg('REST-Server-Skeleton/') + walk_subpkg('NM_REST-Server-Skeleton/') + walk_subpkg('examples/')}
 
 # except IndexError: pass
 

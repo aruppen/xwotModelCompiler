@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<html xmlns:t="http://twistedmatrix.com/ns/twisted.web.template/0.1">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DHT 11 Sensor</title>
+    <link href="/templates/css/application.css?body=1" media="screen" rel="stylesheet" />
+
+    <link rel="stylesheet" href="/templates/css/foundation.css" />
+    <script src="templates/js/vendor/modernizr.js"></script>
+  </head>
+  <body>
+    <header style="margin-bottom: 20px;">
+      <nav class="top-bar">
+        <!-- Area reserved for title -->
+        <ul class="title-area">
+          <li class="name">
+            <h1>
+              <a href="/">
+              <i class="fi-anchor"></i>Arduino Simluator</a>
+            </h1>
+          </li>
+          <li class="toggle-topbar menu-icon">
+            <a>Menu</a>
+          </li>
+        </ul>
+        <section class="top-bar-section">
+          <ul class="left">
+            <li>
+              <a href="/sensors/index">sensors</a>
+            </li>
+          </ul>
+        </section>
+      </nav>
+      <!-- Error Messages -->
+    </header>
+    <div id="body_content" class="row">
+      <div class="column large-10 large-centered">
+        <div class="row">
+          <div class="columns large-3 panel">
+            <div class="panel callout radius">
+              <div class="row"></div>
+                You can now read the values.
+            </div>
+            
+          </div>
+          <div id="arduinoContainer" class="columns large-7 panel">
+            <div class="row arduino1234">
+              <div class="panel callout radius">
+                <div class="fi-eject right" ></div>
+                <div class="row">
+                  <span class="label">DHT 11 Sensor</span>
+                </div>
+               
+                <div class="row">
+                  <span class="columns large-3">Thermistor</span>
+                  <div t:render="temperatureInput"/>
+                  <span id="temperaturetext" class="columns large-1"><span t:render="temp"></span></span>
+                </div>
+                <div class="row">
+                  <span class="columns large-3">Humidity</span>
+                  <div t:render="humidityInput"/>
+                  <span id="humiditytext" class="columns large-1"><span t:render="humidity"></span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <footer style="background-color: #f0f0f0;">
+    <div style="text-align: right;">Andreas Ruppen</div>
+  </footer>
+      <script src="/templates/js/vendor/jquery.js"></script>
+    <script src="/templates/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+    </script>
+</html>
+

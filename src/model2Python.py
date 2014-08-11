@@ -70,10 +70,12 @@ class Model2Python:
         self.__log.debug(node)
         node_type = node.getAttribute('xsi:type')
         resourcePath = path + node.getAttribute('uri') + '/'
-        resourcePath = resourcePath.replace('{', '<int:').replace('}', '>')
+        resourcePath = resourcePath.replace('{', '_int:').replace('}', '_')
         if node_type == 'xwot:SensorResource' or node_type == 'xwot:ActuatorResource' or node_type == 'xwot:ContextResource' or node_type == 'xwot:Resource':
+            # Create a purly WoT service which runs on a Device.
             self.createPythonService(node, resourcePath)
         elif node_type == 'xwot:VResource':
+            # Create a NodeManager service Reflecting the scenario.
             self.createNodeManagerService(node, resourcePath)
             for child_node in self.getResourceNodes(node):
                 node_type = child_node.getAttribute('xsi:type')
@@ -82,6 +84,7 @@ class Model2Python:
                 self.createServers(child_node, resourcePath)
 
     def createPythonService(self, source, path):
+        """Handles the creation of on device services"""
         # Todo create unique names for theses
         project_name = 'REST-Servers/' + path.replace('/', '_') + 'Server'
         self.__log.info('Creating Server: ' + project_name)
@@ -99,15 +102,41 @@ class Model2Python:
         service_file.write(result)
         service_file.close()
 
+    def createNodeManagerService(self, source, path):
+        """Handles the creation of NodeManager Services."""
+        # Todo create unique names for theses
+        project_name = 'REST-Servers/NM-' + path.replace('/', '_') + 'Server'
+        self.__log.info('Creating Server: ' + project_name)
+        shutil.copytree(resource_filename(Requirement.parse("XWoT_Model_Translator"), 'src/NM_REST-Server-Skeleton'),
+                        project_name)
+        self.addResourceDefinitions(source, project_name, "root")
+
+        #do some cleanup. Essentially remove template parameters.
+        filein = open(project_name + '/rest-server.py')
+        src = string.Template(filein.read())
+        r = {'imports': "", 'pathdef': ""}
+        result = src.substitute(r)
+        filein.close()
+        service_file = open(project_name + '/rest-server.py', "w")
+        service_file.write(result)
+        service_file.close()
+
     def addResourceDefinitions(self, node, project_path, parent_filename):
+        """Creates a new Resource Class for each URL segment"""
         self.__log.debug("Working on node " + node.getAttribute('name'))
+
+        #Create the new resource class
         new_parent_filename = self.doAddResourceDefinitions(node, project_path, parent_filename)
+
+        # Fill in the getChild method to delegate the right URL to the right Class
         for resource in self.getResourceNodes(node):
             filein = open(new_parent_filename)
             src = string.Template(filein.read())
             classname = resource.getAttribute('name') + "API"
-            childSubstitute = "if name == '" + resource.getAttribute('uri').replace('{', '<int:').replace('}',
-                                                                                                          '>') + "':" + '\n' + "            return " + classname + "(self.datagen, self.__port, '')" + '\n' + "        $child"
+            if '{' in resource.getAttribute('uri'):
+                childSubstitute = 'if name.isdigit():' + '\n' + "            return " + classname + "(self.datagen, name, self.__port, '')" + '\n' + "        $child"
+            else:
+                childSubstitute = "if name == '" + resource.getAttribute('uri') + "':" + '\n' + "            return " + classname + "(self.datagen, name, self.__port, '')" + '\n' + "        $child"
             importSubstitue = "from " + classname + " import " + classname + '\n' + "$import"
             d = {'child': childSubstitute, 'import': importSubstitue}
             result = src.substitute(d)
@@ -127,25 +156,9 @@ class Model2Python:
         service_file.write(result)
         service_file.close()
 
-    def createNodeManagerService(self, source, path):
-        project_name = 'REST-Servers/NM-' + path.replace('/', '_') + 'Server'
-        self.__log.info('Creating Server: ' + project_name)
-        shutil.copytree(resource_filename(Requirement.parse("XWoT_Model_Translator"), 'src/REST-Server-Skeleton'),
-                        project_name)
-        self.addResourceDefinitions(source, project_name, "root")
-
-        #do some cleanup. Essentially remove template parameters.
-        filein = open(project_name + '/rest-server.py')
-        src = string.Template(filein.read())
-        r = {'imports': "", 'pathdef': ""}
-        result = src.substitute(r)
-        filein.close()
-        service_file = open(project_name + '/rest-server.py', "w")
-        service_file.write(result)
-        service_file.close()
-
     @staticmethod
     def doAddResourceDefinitions(node, project_path, parent_filename):
+        """Intantiates a new resourceAPI.py by copy and fills in the $import and $child Templates"""
         filein = open(project_path + '/resourceAPI.py')
         src = string.Template(filein.read())
         classname = node.getAttribute('name') + "API"
@@ -155,12 +168,12 @@ class Model2Python:
             publisherclassname = classname.replace('ResourceAPI', 'ClientResourceAPI')
             childSubstitute = "if name == '':" + '\n'
             childSubstitute = childSubstitute + '            ' + 'ServerFactory = HeartRateBroadcastFactory' + '\n'
-            childSubstitute = childSubstitute + '            ' + 'factory = ServerFactory("ws://localhost:"+str(self.__port)+"/",  self.datagen, debug = False,  debugCodePaths = False)' + '\n'
+            childSubstitute = childSubstitute + '            ' + 'factory = ServerFactory("ws://localhost:"+str(self.__port)+"/", debug = False,  debugCodePaths = False)' + '\n'
             childSubstitute = childSubstitute + '            ' + 'factory.protocol = wotStreamerProtocol' + '\n'
             childSubstitute = childSubstitute + '            ' + 'factory.setProtocolOptions(allowHixie76 = True)' + '\n'
             childSubstitute = childSubstitute + '            ' + 'return WebSocketResource(factory)' + '\n'
             childSubstitute = childSubstitute + '        ' + 'else:' + '\n'
-            childSubstitute = childSubstitute + '            ' + "return " + publisherclassname + "(self.datagen, self.__port, '')" + '\n'
+            childSubstitute = childSubstitute + '            ' + "return " + publisherclassname + "(self.datagen, '', self.__port, '')" + '\n'
             childSubstitute = childSubstitute + '            ' + '' + '\n'
             childSubstitute = childSubstitute + '            ' + '$child' + '\n'
 
@@ -191,8 +204,8 @@ class Model2Python:
         class_file_in = string.Template(filein.read())
         classnameClass = classname.lower()
         if parent_filename == "root":
-            pathdef = classnameClass + "=" + classname + "(data, self.__port, '')" + '\n        ' + parent_filename + ".putChild('" + node.getAttribute(
-                'uri').replace('{', '<int:').replace('}', '>') + "',  " + classnameClass + ")" + '\n        $pathdef'
+            pathdef = classnameClass + "=" + classname + "(data, '', self.__port, '')" + '\n        ' + parent_filename + ".putChild('" + node.getAttribute(
+                'uri').replace('{', '').replace('}', '') + "',  " + classnameClass + ")" + '\n        $pathdef'
         else:
             pathdef = ''
         imports = "from " + classname + " import " + classname + '\n' + "$imports"

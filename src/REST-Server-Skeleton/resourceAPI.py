@@ -30,7 +30,7 @@ class $classname(resource.Resource):
     """
     isLeaf = False
 
-    def __init__(self, datagen, port, messageStore):
+    def __init__(self, datagen, pathname, port, messageStore):
         resource.Resource.__init__(self)
         self.datagen = datagen
         self.__port = port

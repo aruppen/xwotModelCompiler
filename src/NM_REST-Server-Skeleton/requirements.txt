@@ -1,0 +1,9 @@
+#be sure to install apt-get install libavahi-compat-libdnssd1
+setuptools >= 2.1
+pyserial
+twisted
+autobahn
+git+https://github.com/square/PonyDebugger.git#egg=ponydebugger
+--allow-external pybonjour
+--allow-unverified pybonjour
+
