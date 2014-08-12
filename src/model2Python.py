@@ -144,15 +144,26 @@ class Model2Python:
             class_file.write(result)
             class_file.close()
             self.addResourceDefinitions(resource, project_path, new_parent_filename)
-
-        #do some cleanup. Essentially remove template parameters.
-        filein = open(project_path + '/' + node.getAttribute('name') + "API" + '.py')
+            
+        # Add the resource itself as a child with as the default child to return. This is used for trailing slashes
+        filein = open(new_parent_filename)
         src = string.Template(filein.read())
         if len(self.getResourceNodes(node)) > 0:
             childSubstitute = "else:"+'\n' + "            return " + node.getAttribute('name') + "API" + "(self.datagen, name, self.__port, '')" + '\n'
         else:
             childSubstitute = "return " + node.getAttribute('name') + "API" + "(self.datagen, name, self.__port, '')" + '\n'
-        r = {'classname': '', 'child': childSubstitute, 'import': ''}
+        importSubstitue = "$import"
+        d = {'child': childSubstitute, 'import': importSubstitue}
+        result = src.substitute(d)
+        filein.close()
+        class_file = open(project_path + '/' + node.getAttribute('name') + "API" + '.py', 'w')
+        class_file.write(result)
+        class_file.close()
+
+        #do some cleanup. Essentially remove template parameters.
+        filein = open(project_path + '/' + node.getAttribute('name') + "API" + '.py')
+        src = string.Template(filein.read())
+        r = {'classname': '', 'child': '', 'import': ''}
         result = src.substitute(r)
         filein.close()
         service_file = open(project_path + '/' + node.getAttribute('name') + "API" + '.py', "w")
