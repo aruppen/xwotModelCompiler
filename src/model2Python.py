@@ -11,9 +11,9 @@
 # it under the terms of the GNU General Public License as published by                                     #
 # the Free Software Foundation; either version 2 of the License, or                                        #
 # (at your option) any later version.                                                                      #
-#                                                                                                            #
-#   This program is distributed in the hope that it will be useful,                                          #
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of                                           #
+# #
+# This program is distributed in the hope that it will be useful,                                          #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of                                           #
 #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                                            #
 #   GNU General Public License for more details.                                                             #
 #                                                                                                            #
@@ -91,7 +91,8 @@ class Model2Python:
         self.__log.info('Creating Server: ' + project_name)
         shutil.copytree(resource_filename(Requirement.parse("XWoT_Model_Translator"), 'src/REST-Server-Skeleton'),
                         project_name)
-        self.addResourceDefinitions(source, project_name, "root")
+        source.setAttribute('uri', source.getAttribute('uri').replace('{', '').replace('}', ''))
+        self.addResourceDefinitions(source, project_name, "")
 
         #do some cleanup. Essentially remove template parameters.
         filein = open(project_name + '/rest-server.py')
@@ -99,9 +100,19 @@ class Model2Python:
         r = {'imports': "", 'pathdef': ""}
         result = src.safe_substitute(r)
         filein.close()
-        service_file = open(project_name + '/rest-server.py', "w")
-        service_file.write(result)
-        service_file.close()
+        fileout = open(project_name + '/rest-server.py', "w")
+        fileout.write(result)
+        fileout.close()
+
+        filein = open(project_name + '/rest-documentation.html')
+        src = string.Template(filein.read())
+        r = {'tablebody': ''}
+        result = src.safe_substitute(r)
+        filein.close()
+        fileout = open(project_name + '/rest-documentation.html', "w")
+        fileout.write(result)
+        fileout.close()
+
         self.cleanupServerProject(project_name)
 
     def createNodeManagerService(self, source, path):
@@ -111,7 +122,7 @@ class Model2Python:
         self.__log.info('Creating Server: ' + project_name)
         shutil.copytree(resource_filename(Requirement.parse("XWoT_Model_Translator"), 'src/NM_REST-Server-Skeleton'),
                         project_name)
-        self.addResourceDefinitions(source, project_name, "root")
+        self.addResourceDefinitions(source, project_name, "")
 
         #do some cleanup. Essentially remove template parameters.
         filein = open(project_name + '/rest-server.py')
@@ -119,9 +130,19 @@ class Model2Python:
         r = {'imports': "", 'pathdef': ""}
         result = src.safe_substitute(r)
         filein.close()
-        service_file = open(project_name + '/rest-server.py', "w")
-        service_file.write(result)
-        service_file.close()
+        fileout = open(project_name + '/rest-server.py', "w")
+        fileout.write(result)
+        fileout.close()
+
+        filein = open(project_name + '/rest-documentation.html')
+        src = string.Template(filein.read())
+        r = {'tablebody': ''}
+        result = src.safe_substitute(r)
+        filein.close()
+        fileout = open(project_name + '/rest-documentation.html', "w")
+        fileout.write(result)
+        fileout.close()
+
         self.cleanupServerProject(project_name)
 
     def addResourceDefinitions(self, node, project_path, parent_filename):
@@ -148,27 +169,29 @@ class Model2Python:
             class_file = open(new_parent_filename, 'w')
             class_file.write(result)
             class_file.close()
-            self.addResourceDefinitions(resource, project_path, new_parent_filename)
+            self.addResourceDefinitions(resource, project_path, parent_filename + '/' + node.getAttribute('uri'))
         # Add all the methods:
+        resource = {'name': node.getAttribute('name'), 'type': node.getAttribute('xsi:type'),
+                    'uri': parent_filename + '/' + node.getAttribute('uri')}
         wottype = node.getAttribute('xsi:type')
         if wottype == 'xwot:SensorResource':
-            self.addGETMethod(project_path, new_parent_filename)
+            self.addGETMethod(project_path, new_parent_filename, resource)
         elif wottype == 'xwot:ActuatorResource':
-            self.addPUTMethod(project_path, new_parent_filename)
+            self.addPUTMethod(project_path, new_parent_filename, resource)
         elif wottype == 'xwot:ContextResource':
-            self.addGETMethod(project_path, new_parent_filename)
-            self.addPUTMethod(project_path, new_parent_filename)
+            self.addGETMethod(project_path, new_parent_filename, resource)
+            self.addPUTMethod(project_path, new_parent_filename, resource)
         elif wottype == 'xwot:Resource':
-            self.addGETMethod(project_path, new_parent_filename)
-            self.addPUTMethod(project_path, new_parent_filename)
+            self.addGETMethod(project_path, new_parent_filename, resource)
+            self.addPUTMethod(project_path, new_parent_filename, resource)
         elif wottype == 'xwot:PublisherResource':
-            self.addGETMethod(project_path, new_parent_filename)
-            self.addPOSTMethod(project_path, new_parent_filename)
+            self.addGETMethod(project_path, new_parent_filename, resource)
+            self.addPOSTMethod(project_path, new_parent_filename, resource)
         elif wottype == 'xwot:VResource':
-            self.addGETMethod(project_path, new_parent_filename)
-            self.addPUTMethod(project_path, new_parent_filename)
-            self.addPOSTMethod(project_path, new_parent_filename)
-            self.addDELETEMethod(project_path, new_parent_filename)
+            self.addGETMethod(project_path, new_parent_filename, resource)
+            self.addPUTMethod(project_path, new_parent_filename, resource)
+            self.addPOSTMethod(project_path, new_parent_filename, resource)
+            self.addDELETEMethod(project_path, new_parent_filename, resource)
 
         # Add the resource itself as a child with as the default child to return. This is used for trailing slashes
         filein = open(new_parent_filename)
@@ -222,7 +245,7 @@ class Model2Python:
             importsubstitue += "from WebSocketSupport import wotStreamerProtocol" + '\n'
             importsubstitue += "from WebSocketSupport import HeartRateBroadcastFactory" + '\n'
             importsubstitue += '$import'
-            self.createPublisherClient(project_path, publisherclassname)
+            self.createPublisherClient(project_path, publisherclassname, parent_filename)
 
         d = {'classname': classname, 'child': childSubstitute, 'import': importsubstitue}
         result = src.safe_substitute(d)
@@ -235,8 +258,8 @@ class Model2Python:
         filein = open(project_path + '/rest-server.py')
         class_file_in = string.Template(filein.read())
         classnameClass = classname.lower()
-        if parent_filename == "root":
-            pathdef = classnameClass + "=" + classname + "(data, '', self.__port, '')" + '\n        ' + parent_filename + ".putChild('" + node.getAttribute(
+        if parent_filename == "":
+            pathdef = classnameClass + "=" + classname + "(data, '', self.__port, '')" + '\n        ' + "root.putChild('" + node.getAttribute(
                 'uri').replace('{', '').replace('}', '') + "',  " + classnameClass + ")" + '\n        $pathdef'
             imports = "from " + classname + " import " + classname + '\n' + "$imports"
             r = {'imports': imports, 'pathdef': pathdef}
@@ -248,12 +271,14 @@ class Model2Python:
 
         return project_path + '/' + classname + '.py'
 
-    def createPublisherClient(self, project_path, classname):
+    def createPublisherClient(self, project_path, classname, parent_uri):
         """Create the  publisher client class"""
-        shutil.copy2(os.path.join(project_path, 'resourceAPI.py'), os.path.join(project_path, classname+'.py'))
-        self.addGETMethod(project_path, os.path.join(project_path, classname + '.py'))
-        self.addPUTMethod(project_path, os.path.join(project_path, classname + '.py'))
-        self.addDELETEMethod(project_path, os.path.join(project_path, classname + '.py'))
+        shutil.copy2(os.path.join(project_path, 'resourceAPI.py'), os.path.join(project_path, classname + '.py'))
+        resource = {'name': classname, 'type': 'publisher',
+                    'uri': parent_uri + '/pub/{id}'}
+        self.addGETMethod(project_path, os.path.join(project_path, classname + '.py'), resource)
+        self.addPUTMethod(project_path, os.path.join(project_path, classname + '.py'), resource)
+        self.addDELETEMethod(project_path, os.path.join(project_path, classname + '.py'), resource)
         filein = open(project_path + '/' + classname + '.py')
         src = string.Template(filein.read())
         filein.close()
@@ -264,57 +289,85 @@ class Model2Python:
         class_file.write(result)
         class_file.close()
 
-    @staticmethod
-    def addGETMethod(project_path, resource):
+    def addGETMethod(self, project_path, resourceclassfile, resource):
         methodin = open(project_path + '/render_GET.txt')
-        filein = open(resource)
+        filein = open(resourceclassfile)
         render_method = methodin.read() + '\n' + '$render_method'
         src = string.Template(filein.read())
         d = {'render_method': render_method}
         result = src.safe_substitute(d)
         filein.close()
-        class_file = open(resource, 'w')
+        class_file = open(resourceclassfile, 'w')
         class_file.write(result)
         class_file.close()
+        resource['method'] = 'GET'
+        self.addHTMLInfoTableBody(os.path.join(project_path, 'rest-documentation.html'), resource)
 
-    @staticmethod
-    def addPUTMethod(project_path, resource):
+    def addPUTMethod(self, project_path, resourceclassfile, resource):
         methodin = open(project_path + '/render_PUT.txt')
-        filein = open(resource)
+        filein = open(resourceclassfile)
         render_method = methodin.read() + '\n' + '$render_method'
         src = string.Template(filein.read())
         d = {'render_method': render_method}
         result = src.safe_substitute(d)
         filein.close()
-        class_file = open(resource, 'w')
+        class_file = open(resourceclassfile, 'w')
         class_file.write(result)
         class_file.close()
+        resource['method'] = 'PUT'
+        self.addHTMLInfoTableBody(os.path.join(project_path, 'rest-documentation.html'), resource)
 
-    @staticmethod
-    def addPOSTMethod(project_path, resource):
+    def addPOSTMethod(self, project_path, resourceclassfile, resource):
         methodin = open(project_path + '/render_POST.txt')
-        filein = open(resource)
+        filein = open(resourceclassfile)
         render_method = methodin.read() + '\n' + '$render_method'
         src = string.Template(filein.read())
         d = {'render_method': render_method}
         result = src.safe_substitute(d)
         filein.close()
-        class_file = open(resource, 'w')
+        class_file = open(resourceclassfile, 'w')
         class_file.write(result)
         class_file.close()
+        resource['method'] = 'POST'
+        self.addHTMLInfoTableBody(os.path.join(project_path, 'rest-documentation.html'), resource)
 
-    @staticmethod
-    def addDELETEMethod(project_path, resource):
+    def addDELETEMethod(self, project_path, resourceclassfile, resource):
         methodin = open(project_path + '/render_DELETE.txt')
-        filein = open(resource)
+        filein = open(resourceclassfile)
         render_method = methodin.read() + '\n' + '$render_method'
         src = string.Template(filein.read())
         d = {'render_method': render_method}
         result = src.safe_substitute(d)
         filein.close()
-        class_file = open(resource, 'w')
+        class_file = open(resourceclassfile, 'w')
         class_file.write(result)
         class_file.close()
+        resource['method'] = 'DELETE'
+        self.addHTMLInfoTableBody(os.path.join(project_path, 'rest-documentation.html'), resource)
+
+    def addHTMLInfoTableBody(self, htmlfile, resource):
+        tablebody = '    <div id="' + resource[
+            'name'] + '" class="method">' + '\n' + '        <tr>' + '\n' + '            <td>' + '\n' + '                <div id="' + \
+                    resource['name'] + 'Address" class="address"><a href="' + resource[
+                        'uri'] + '">http://localhost:9000' + resource[
+                        'uri'] + '</a></div></td>' + '\n' + '            <td>' + '\n' + '                <div id="' + \
+                    resource['name'] + 'Label">' + resource['name'] + ' - ' + resource[
+                        'type'] + '</div>' + '\n' + '            </td>' + '\n' + '            <div id="' + resource[
+                        'name'] + 'Operation" class="operation">' + '\n' + '                <td>' + '\n' + '                    <div id="' + \
+                    resource[
+                        'name'] + 'Input" class="input">-</div>' + '\n' + '                    /' + '\n' + '                    <div id="' + \
+                    resource[
+                        'name'] + 'Output" class="output">JSON-XML-HTML</div>' + '\n' + '                </td>' + '\n' + '                <td>' + '\n' + '                    <div class="label">' + \
+                    resource[
+                        'method'] + '</div>' + '\n' + '                </td>' + '\n' + '            </div>' + '\n' + '            <td></td>' + '\n' + '        </tr>' + '\n' + '    </div>' + '\n' + '$tablebody'
+        filein = open(htmlfile)
+        src = string.Template(filein.read())
+        d = {'tablebody': tablebody}
+        result = src.safe_substitute(d)
+        filein.close()
+        fileout = open(htmlfile, 'w')
+        fileout.write(result)
+        fileout.close()
 
     def cleanupServerProject(self, project_path):
         pattern = 'render_\w+.txt'
