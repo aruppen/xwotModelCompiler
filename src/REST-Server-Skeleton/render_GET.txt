@@ -1,0 +1,24 @@
+    def render_GET(self, request):
+        """Handles GET requests"""
+        # TODO implement this
+        self.data = self.datagen.next()
+        json_data = json.loads(self.data)
+        # pprint(request.__dict__)
+        logging.debug(request.requestHeaders)
+        accept_type = request.requestHeaders.getRawHeaders("Accept")[0]
+        if not None:
+            if accept_type == "application/json":
+                request.setHeader("Content-Type", "application/json; charset=UTF-8")
+                request.setResponseCode(200)
+                # TODO implement JSON response
+            elif accept_type == "application/xml":
+                request.setHeader("Content-Type", "application/xml; charset=UTF-8")
+                request.setResponseCode(200)
+                # TODO implement XML response
+            else:
+                request.write("<!DOCTYPE html>\n")
+                flattenString(request, ExampleElement(json_data['temperature'], json_data['humidity'])).addCallback(
+                    request.write)
+                request.finish()
+                # TODO implement HTML response
+                return NOT_DONE_YET

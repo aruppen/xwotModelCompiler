@@ -36,36 +36,8 @@ class $classname(resource.Resource):
         self.__port = port
         self.datagen = datagen
 
-    def render_GET(self, request):
-        """Handles GET requests"""
-        # TODO implement this
-        self.data = self.datagen.next()
-        json_data = json.loads(self.data)
-        # pprint(request.__dict__)
-        logging.debug(request.requestHeaders)
-        accept_type = request.requestHeaders.getRawHeaders("Accept")[0]
-        if not None:
-            if accept_type == "application/json":
-                request.setResponseCode(200)
-                request.setHeader("Content-Type", "application/json; charset=UTF-8")
-                # TODO implement JSON response
-                return str(
-                    '{"temperature": {"@units": "celsisus","@precision": "2","#text": "%5.2f"},"humidity": {"@units": "celsisus","@precision": "2","#text": "%5.2f"}, "timestamp": "%d"}' % (
-                    float(json_data['temperature']), float(json_data['humidity']), time.time()))
-            elif accept_type == "application/xml":
-                request.setResponseCode(200)
-                request.setHeader("Content-Type", "application/xml; charset=UTF-8")
-                # TODO implement XML response
-                return str(
-                    '<?xml version="1.0"?><measure><temperature units="celsisus" precision="2">%5.2f</temperature><humidity units="celsisus" precision="2">%5.2f</humidity><timestamp>%d</timestamp></measure>' % (
-                    float(json_data['temperature']), float(json_data['humidity']), time.time()))
-            else:
-                request.write("<!DOCTYPE html>\n")
-                flattenString(request, ExampleElement(json_data['temperature'], json_data['humidity'])).addCallback(
-                    request.write)
-                request.finish()
-                # TODO implement HTML response
-                return NOT_DONE_YET
+$render_method
+
 
     def getChild(self, name, request):
         """some comments"""

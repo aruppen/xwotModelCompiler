@@ -9,8 +9,8 @@
 # License: GPL                                                                                               #
 # This program is free software; you can redistribute it and/or modify                                       #
 # it under the terms of the GNU General Public License as published by                                     #
-#   the Free Software Foundation; either version 2 of the License, or                                        #
-#   (at your option) any later version.                                                                      #
+# the Free Software Foundation; either version 2 of the License, or                                        #
+# (at your option) any later version.                                                                      #
 #                                                                                                            #
 #   This program is distributed in the hope that it will be useful,                                          #
 #   but WITHOUT ANY WARRANTY; without even the implied warranty of                                           #
@@ -30,6 +30,8 @@ import logging.config
 import sys
 import xml.dom.minidom
 import argparse
+import traceback
+import re
 from os.path import dirname, join, expanduser
 from pkg_resources import Requirement, resource_filename
 
@@ -95,11 +97,12 @@ class Model2Python:
         filein = open(project_name + '/rest-server.py')
         src = string.Template(filein.read())
         r = {'imports': "", 'pathdef': ""}
-        result = src.substitute(r)
+        result = src.safe_substitute(r)
         filein.close()
         service_file = open(project_name + '/rest-server.py', "w")
         service_file.write(result)
         service_file.close()
+        self.cleanupServerProject(project_name)
 
     def createNodeManagerService(self, source, path):
         """Handles the creation of NodeManager Services."""
@@ -114,19 +117,20 @@ class Model2Python:
         filein = open(project_name + '/rest-server.py')
         src = string.Template(filein.read())
         r = {'imports': "", 'pathdef': ""}
-        result = src.substitute(r)
+        result = src.safe_substitute(r)
         filein.close()
         service_file = open(project_name + '/rest-server.py', "w")
         service_file.write(result)
         service_file.close()
+        self.cleanupServerProject(project_name)
 
     def addResourceDefinitions(self, node, project_path, parent_filename):
         """Creates a new Resource Class for each URL segment"""
-        self.__log.debug("Working on node " + node.getAttribute('name'))
+        self.__log.debug("Working on node: " + node.getAttribute('name'))
 
         #Create the new resource class
         new_parent_filename = self.doAddResourceDefinitions(node, project_path, parent_filename)
-
+        self.__log.debug("associated file is:  " + new_parent_filename)
         # Fill in the getChild method to delegate the right URL to the right Class
         for resource in self.getResourceNodes(node):
             filein = open(new_parent_filename)
@@ -135,79 +139,93 @@ class Model2Python:
             if '{' in resource.getAttribute('uri'):
                 childSubstitute = 'if name.isdigit():' + '\n' + "            return " + classname + "(self.datagen, name, self.__port, '')" + '\n' + "        $child"
             else:
-                childSubstitute = "if name == '" + resource.getAttribute('uri') + "':" + '\n' + "            return " + classname + "(self.datagen, name, self.__port, '')" + '\n' + "        $child"
+                childSubstitute = "if name == '" + resource.getAttribute(
+                    'uri') + "':" + '\n' + "            return " + classname + "(self.datagen, name, self.__port, '')" + '\n' + "        $child"
             importSubstitue = "from " + classname + " import " + classname + '\n' + "$import"
             d = {'child': childSubstitute, 'import': importSubstitue}
-            result = src.substitute(d)
+            result = src.safe_substitute(d)
             filein.close()
-            class_file = open(project_path + '/' + node.getAttribute('name') + "API" + '.py', 'w')
+            class_file = open(new_parent_filename, 'w')
             class_file.write(result)
             class_file.close()
             self.addResourceDefinitions(resource, project_path, new_parent_filename)
-            
+        # Add all the methods:
+        wottype = node.getAttribute('xsi:type')
+        if wottype == 'xwot:SensorResource':
+            self.addGETMethod(project_path, new_parent_filename)
+        elif wottype == 'xwot:ActuatorResource':
+            self.addPUTMethod(project_path, new_parent_filename)
+        elif wottype == 'xwot:ContextResource':
+            self.addGETMethod(project_path, new_parent_filename)
+            self.addPUTMethod(project_path, new_parent_filename)
+        elif wottype == 'xwot:Resource':
+            self.addGETMethod(project_path, new_parent_filename)
+            self.addPUTMethod(project_path, new_parent_filename)
+        elif wottype == 'xwot:PublisherResource':
+            self.addGETMethod(project_path, new_parent_filename)
+            self.addPOSTMethod(project_path, new_parent_filename)
+        elif wottype == 'xwot:VResource':
+            self.addGETMethod(project_path, new_parent_filename)
+            self.addPUTMethod(project_path, new_parent_filename)
+            self.addPOSTMethod(project_path, new_parent_filename)
+            self.addDELETEMethod(project_path, new_parent_filename)
+
         # Add the resource itself as a child with as the default child to return. This is used for trailing slashes
         filein = open(new_parent_filename)
         src = string.Template(filein.read())
         if len(self.getResourceNodes(node)) > 0:
-            childSubstitute = "else:"+'\n' + "            return " + node.getAttribute('name') + "API" + "(self.datagen, name, self.__port, '')" + '\n'
+            childSubstitute = "else:" + '\n' + "            return " + node.getAttribute(
+                'name') + "API" + "(self.datagen, name, self.__port, '')" + '\n'
         else:
-            childSubstitute = "return " + node.getAttribute('name') + "API" + "(self.datagen, name, self.__port, '')" + '\n'
+            childSubstitute = "return " + node.getAttribute(
+                'name') + "API" + "(self.datagen, name, self.__port, '')" + '\n'
         importSubstitue = "$import"
         d = {'child': childSubstitute, 'import': importSubstitue}
-        result = src.substitute(d)
+        result = src.safe_substitute(d)
         filein.close()
-        class_file = open(project_path + '/' + node.getAttribute('name') + "API" + '.py', 'w')
+        class_file = open(new_parent_filename, 'w')
         class_file.write(result)
         class_file.close()
 
         #do some cleanup. Essentially remove template parameters.
         filein = open(project_path + '/' + node.getAttribute('name') + "API" + '.py')
         src = string.Template(filein.read())
-        r = {'classname': '', 'child': '', 'import': ''}
-        result = src.substitute(r)
+        r = {'classname': '', 'child': '', 'import': '', 'render_method': ''}
+        result = src.safe_substitute(r)
         filein.close()
         service_file = open(project_path + '/' + node.getAttribute('name') + "API" + '.py', "w")
         service_file.write(result)
         service_file.close()
 
-    @staticmethod
-    def doAddResourceDefinitions(node, project_path, parent_filename):
+    def doAddResourceDefinitions(self, node, project_path, parent_filename):
         """Intantiates a new resourceAPI.py by copy and fills in the $import and $child Templates"""
         filein = open(project_path + '/resourceAPI.py')
         src = string.Template(filein.read())
         classname = node.getAttribute('name') + "API"
         importsubstitue = '$import'
+        childSubstitute = '$child'
         if node.getAttribute('uri') == 'pub':
             # set the childSubstitute for the *PublisherResourceAPI class
             publisherclassname = classname.replace('ResourceAPI', 'ClientResourceAPI')
             childSubstitute = "if name == '':" + '\n'
             childSubstitute = childSubstitute + '            ' + 'ServerFactory = HeartRateBroadcastFactory' + '\n'
-            childSubstitute = childSubstitute + '            ' + 'factory = ServerFactory("ws://localhost:"+str(self.__port)+"/", debug = False,  debugCodePaths = False)' + '\n'
+            childSubstitute = childSubstitute + '            ' + 'factory = ServerFactory("ws://localhost:"+str(self.__port)+"/", self.datagen, debug = False,  debugCodePaths = False)' + '\n'
             childSubstitute = childSubstitute + '            ' + 'factory.protocol = wotStreamerProtocol' + '\n'
             childSubstitute = childSubstitute + '            ' + 'factory.setProtocolOptions(allowHixie76 = True)' + '\n'
             childSubstitute = childSubstitute + '            ' + 'return WebSocketResource(factory)' + '\n'
             childSubstitute = childSubstitute + '        ' + 'else:' + '\n'
-            childSubstitute = childSubstitute + '            ' + "return " + publisherclassname + "(self.datagen, '', self.__port, '')" + '\n'
+            childSubstitute = childSubstitute + '            ' + "return " + publisherclassname + "(self.datagen, name, self.__port, '')" + '\n'
             childSubstitute = childSubstitute + '            ' + '' + '\n'
-            childSubstitute = childSubstitute + '            ' + '$child' + '\n'
-
-            # Create the  publisher client class
-            d = {'classname': publisherclassname, 'child': '', 'import': ''}
-            result = src.substitute(d)
-            #filein2.close()
-            class_file = open(project_path + '/' + publisherclassname + '.py', 'w')
-            class_file.write(result)
-            class_file.close()
 
             # set the import for the *PublisherResourceAPI class
             importsubstitue = 'from ' + publisherclassname + ' import ' + publisherclassname + '\n'
             importsubstitue += "from WebSocketSupport import wotStreamerProtocol" + '\n'
             importsubstitue += "from WebSocketSupport import HeartRateBroadcastFactory" + '\n'
             importsubstitue += '$import'
-        else:
-            childSubstitute = '$child'
+            self.createPublisherClient(project_path, publisherclassname)
+
         d = {'classname': classname, 'child': childSubstitute, 'import': importsubstitue}
-        result = src.substitute(d)
+        result = src.safe_substitute(d)
         filein.close()
         class_file = open(project_path + '/' + classname + '.py', 'w')
         class_file.write(result)
@@ -222,13 +240,94 @@ class Model2Python:
                 'uri').replace('{', '').replace('}', '') + "',  " + classnameClass + ")" + '\n        $pathdef'
             imports = "from " + classname + " import " + classname + '\n' + "$imports"
             r = {'imports': imports, 'pathdef': pathdef}
-            class_file_in = class_file_in.substitute(r)
+            class_file_in = class_file_in.safe_substitute(r)
             class_file = open(project_path + '/rest-server.py', "w")
             class_file.write(class_file_in)
             class_file.close()
             filein.close()
 
         return project_path + '/' + classname + '.py'
+
+    def createPublisherClient(self, project_path, classname):
+        """Create the  publisher client class"""
+        shutil.copy2(os.path.join(project_path, 'resourceAPI.py'), os.path.join(project_path, classname+'.py'))
+        self.addGETMethod(project_path, os.path.join(project_path, classname + '.py'))
+        self.addPUTMethod(project_path, os.path.join(project_path, classname + '.py'))
+        self.addDELETEMethod(project_path, os.path.join(project_path, classname + '.py'))
+        filein = open(project_path + '/' + classname + '.py')
+        src = string.Template(filein.read())
+        filein.close()
+        childSubstitute = "return " + classname + "(self.datagen, name, self.__port, '')" + '\n'
+        d = {'classname': classname, 'child': childSubstitute, 'import': '', 'render_method': ''}
+        result = src.safe_substitute(d)
+        class_file = open(project_path + '/' + classname + '.py', 'w')
+        class_file.write(result)
+        class_file.close()
+
+    @staticmethod
+    def addGETMethod(project_path, resource):
+        methodin = open(project_path + '/render_GET.txt')
+        filein = open(resource)
+        render_method = methodin.read() + '\n' + '$render_method'
+        src = string.Template(filein.read())
+        d = {'render_method': render_method}
+        result = src.safe_substitute(d)
+        filein.close()
+        class_file = open(resource, 'w')
+        class_file.write(result)
+        class_file.close()
+
+    @staticmethod
+    def addPUTMethod(project_path, resource):
+        methodin = open(project_path + '/render_PUT.txt')
+        filein = open(resource)
+        render_method = methodin.read() + '\n' + '$render_method'
+        src = string.Template(filein.read())
+        d = {'render_method': render_method}
+        result = src.safe_substitute(d)
+        filein.close()
+        class_file = open(resource, 'w')
+        class_file.write(result)
+        class_file.close()
+
+    @staticmethod
+    def addPOSTMethod(project_path, resource):
+        methodin = open(project_path + '/render_POST.txt')
+        filein = open(resource)
+        render_method = methodin.read() + '\n' + '$render_method'
+        src = string.Template(filein.read())
+        d = {'render_method': render_method}
+        result = src.safe_substitute(d)
+        filein.close()
+        class_file = open(resource, 'w')
+        class_file.write(result)
+        class_file.close()
+
+    @staticmethod
+    def addDELETEMethod(project_path, resource):
+        methodin = open(project_path + '/render_DELETE.txt')
+        filein = open(resource)
+        render_method = methodin.read() + '\n' + '$render_method'
+        src = string.Template(filein.read())
+        d = {'render_method': render_method}
+        result = src.safe_substitute(d)
+        filein.close()
+        class_file = open(resource, 'w')
+        class_file.write(result)
+        class_file.close()
+
+    def cleanupServerProject(self, project_path):
+        pattern = 'render_\w+.txt'
+        self.regexRemove(project_path, pattern)
+        pattern = '.*\.pyc'
+        self.regexRemove(project_path, pattern)
+        os.remove(os.path.join(project_path, 'resourceAPI.py'))
+
+    @staticmethod
+    def regexRemove(path, pattern):
+        for root, dirs, files in os.walk(path):
+            for filteredfile in filter(lambda x: re.match(pattern, x), files):
+                os.remove(os.path.join(root, filteredfile))
 
     @staticmethod
     def getResourceNodes(parent):
@@ -250,12 +349,13 @@ class Model2Python:
         ve = self.__model.getElementsByTagName('VirtualEntity')[0]
         try:
             self.__log.info("Start processing")
-            logging.debug("Entity is: "+entity.getAttribute('name').lower())
+            logging.debug("Entity is: " + entity.getAttribute('name').lower())
             self.createServers(ve, entity.getAttribute('name').lower())
             self.__log.info("Successfully created the necessary service(s)")
         except Exception as err:
             self.__log.error("Something went really wrong")
             self.__log.debug(err)
+            traceback.print_exc(file=sys.stdout)
 
     def getArguments(self, argv):
         parser = argparse.ArgumentParser()
