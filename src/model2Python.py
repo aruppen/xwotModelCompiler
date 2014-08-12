@@ -67,7 +67,6 @@ class Model2Python:
         self.__input = None
 
     def createServers(self, node, path):
-        self.__log.debug(node)
         node_type = node.getAttribute('xsi:type')
         resourcePath = path + node.getAttribute('uri') + '/'
         resourcePath = resourcePath.replace('{', '_int:').replace('}', '_')
@@ -149,7 +148,11 @@ class Model2Python:
         #do some cleanup. Essentially remove template parameters.
         filein = open(project_path + '/' + node.getAttribute('name') + "API" + '.py')
         src = string.Template(filein.read())
-        r = {'classname': '', 'child': '', 'import': ''}
+        if len(self.getResourceNodes(node)) > 0:
+            childSubstitute = "else:"+'\n' + "            return " + node.getAttribute('name') + "API" + "(self.datagen, name, self.__port, '')" + '\n'
+        else:
+            childSubstitute = "return " + node.getAttribute('name') + "API" + "(self.datagen, name, self.__port, '')" + '\n'
+        r = {'classname': '', 'child': childSubstitute, 'import': ''}
         result = src.substitute(r)
         filein.close()
         service_file = open(project_path + '/' + node.getAttribute('name') + "API" + '.py', "w")
@@ -206,15 +209,13 @@ class Model2Python:
         if parent_filename == "root":
             pathdef = classnameClass + "=" + classname + "(data, '', self.__port, '')" + '\n        ' + parent_filename + ".putChild('" + node.getAttribute(
                 'uri').replace('{', '').replace('}', '') + "',  " + classnameClass + ")" + '\n        $pathdef'
-        else:
-            pathdef = ''
-        imports = "from " + classname + " import " + classname + '\n' + "$imports"
-        r = {'imports': imports, 'pathdef': pathdef}
-        class_file_in = class_file_in.substitute(r)
-        class_file = open(project_path + '/rest-server.py', "w")
-        class_file.write(class_file_in)
-        class_file.close()
-        filein.close()
+            imports = "from " + classname + " import " + classname + '\n' + "$imports"
+            r = {'imports': imports, 'pathdef': pathdef}
+            class_file_in = class_file_in.substitute(r)
+            class_file = open(project_path + '/rest-server.py', "w")
+            class_file.write(class_file_in)
+            class_file.close()
+            filein.close()
 
         return project_path + '/' + classname + '.py'
 
@@ -234,10 +235,12 @@ class Model2Python:
         if os.path.exists(output_dir):
             shutil.rmtree(output_dir)
         os.mkdir(output_dir)
+        entity = self.__model.getElementsByTagName('xwot:Entity')[0]
         ve = self.__model.getElementsByTagName('VirtualEntity')[0]
         try:
             self.__log.info("Start processing")
-            self.createServers(ve, '/')
+            logging.debug("Entity is: "+entity.getAttribute('name').lower())
+            self.createServers(ve, entity.getAttribute('name').lower())
             self.__log.info("Successfully created the necessary service(s)")
         except Exception as err:
             self.__log.error("Something went really wrong")

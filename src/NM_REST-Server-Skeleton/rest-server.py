@@ -85,7 +85,7 @@ class RestServer(object):
         service.publish()
         data = ''
         logging.info("Up and Running")
-        
+
         root = File('.')
         root.indexNames = ['rest-documentation.html']
         $pathdef
