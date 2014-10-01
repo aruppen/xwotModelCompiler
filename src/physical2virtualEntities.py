@@ -88,17 +88,11 @@ class Physical2VirtualEntities:
         ve.setAttribute('name', name + 'Resource')
         uri = raw_input('Specify URI for ' + Fore.RED + elType + ' ' + Fore.GREEN + name + Fore.RESET + ': ')
         ve.setAttribute('uri', uri)
-        if elType == 'xwot:NodeDevice':
-            ve.setAttribute('xsi:type', 'xwot:NodeResource')
-            root.appendChild(ve)
-            physicalEntities = list(
-                self.__filterChildrenByTagName(self.__model.getElementsByTagName('PhysicalEntity')[0], 'Component'))
-            physicalEntities = self.__searchForContextResources(physicalEntities, newPhysEnt, ve)
-            for entity in physicalEntities:
-                self.__log.debug('Working on Node: ' + entity.getAttribute('name'))
-                self.__addResources(newPhysEnt, entity, ve)
-        elif elType == 'xwot:EntityDevice':
-            ve.setAttribute('xsi:type', 'xwot:EntityResource')
+        if elType == 'xwot:Device':
+            ve.setAttribute('xsi:type', 'xwot:Resource')
+            self.__log.debug(physicalEntity.attributes)
+            if  physicalEntity.hasAttribute('composed'):
+                ve.setAttribute('composed',  physicalEntity.getAttribute('composed'))
             root.appendChild(ve)
             physicalEntities = list(
                 self.__filterChildrenByTagName(self.__model.getElementsByTagName('PhysicalEntity')[0], 'Component'))
@@ -125,16 +119,10 @@ class Physical2VirtualEntities:
         vent.setAttribute('uri', uri)
         newTargetPhysicalEntity = sourceNode.cloneNode(False)
         targetPhysicalEntity.appendChild(newTargetPhysicalEntity)
-        if etype == 'xwot:NodeDevice':
-            vent.setAttribute('xsi:type', 'xwot:NodeResource')
-            targetNode.appendChild(vent)
-            subPhysicalEntities = list(self.__filterChildrenByTagName(sourceNode, 'Component'))
-            subPhysicalEntities = self.__searchForContextResources(subPhysicalEntities, newTargetPhysicalEntity, vent)
-            for subEntity in subPhysicalEntities:
-                self.__log.debug('Working on Node: ' + subEntity.getAttribute('name'))
-                self.__addResources(newTargetPhysicalEntity, subEntity, vent)
-        elif etype == 'xwot:EntityDevice':
-            vent.setAttribute('xsi:type', 'xwot:EntityResource')
+        if etype == 'xwot:Device':
+            vent.setAttribute('xsi:type', 'xwot:Resource')
+            if  sourceNode.hasAttribute('composed'):
+                vent.setAttribute('composed',  sourceNode.getAttribute('composed'))
             targetNode.appendChild(vent)
             subPhysicalEntities = list(self.__filterChildrenByTagName(sourceNode, 'Component'))
             subPhysicalEntities = self.__searchForContextResources(subPhysicalEntities, newTargetPhysicalEntity, vent)
