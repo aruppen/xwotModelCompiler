@@ -70,12 +70,12 @@ class Model2Python:
 
     def createServers(self, node, path):
         node_type = node.getAttribute('xsi:type')
+        node_composed = False
+        if node.hasAttribute('composed'):
+            node_composed = True
         resourcePath = path + node.getAttribute('uri') + '/'
         resourcePath = resourcePath.replace('{', '_int:').replace('}', '_')
-        if node_type == 'xwot:SensorResource' or node_type == 'xwot:ActuatorResource' or node_type == 'xwot:ContextResource' or node_type == 'xwot:Resource':
-            # Create a purly WoT service which runs on a Device.
-            self.createPythonService(node, resourcePath)
-        elif node_type == 'xwot:VResource':
+        if node_type == 'xwot:Resource' and node_composed:
             # Create a NodeManager service Reflecting the scenario.
             self.createNodeManagerService(node, resourcePath)
             for child_node in self.getResourceNodes(node):
@@ -83,6 +83,9 @@ class Model2Python:
                 if node_type == 'xwot:SensorResource' or node_type == 'xwot:ActuatorResource' or node_type == 'xwot:ContextResource' or node_type == 'xwot:Resource':
                     resourcePath = '/'
                 self.createServers(child_node, resourcePath)
+        else:#if node_type == 'xwot:SensorResource' or node_type == 'xwot:ActuatorResource' or node_type == 'xwot:ContextResource' or node_type == 'xwot:Resource':
+            # Create a purly WoT service which runs on a Device.
+            self.createPythonService(node, resourcePath)
 
     def createPythonService(self, source, path):
         """Handles the creation of on device services"""
