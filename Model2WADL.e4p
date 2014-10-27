@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-4.6.dtd">
 <!-- eric4 project file for project Model2WADL -->
-<!-- Saved: 2014-07-01, 20:57:09 -->
+<!-- Saved: 2014-10-01, 14:49:38 -->
 <!-- Copyright (C) 2014 Andreas Ruppen, andreas.ruppen@unifr.ch -->
 <Project version="4.6">
   <Language>en</Language>
@@ -14,7 +14,6 @@
   <Sources>
     <Source>src/model2WADL.py</Source>
     <Source>src/physical2virtualEntities.py</Source>
-    <Source>__init__.py</Source>
     <Source>src/model2Python.py</Source>
   </Sources>
   <Forms>
