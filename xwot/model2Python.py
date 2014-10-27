@@ -92,7 +92,7 @@ class Model2Python:
         # Todo create unique names for theses
         project_name = 'REST-Servers/' + path.replace('/', '_') + 'Server'
         self.__log.info('Creating Server: ' + project_name)
-        shutil.copytree(resource_filename(Requirement.parse("XWoT_Model_Translator"), 'src/REST-Server-Skeleton'),
+        shutil.copytree(resource_filename(Requirement.parse("XWoT_Model_Translator"), 'xwot/REST-Server-Skeleton'),
                         project_name)
         source.setAttribute('uri', source.getAttribute('uri').replace('{', '').replace('}', ''))
         self.addResourceDefinitions(source, project_name, "")
@@ -123,7 +123,7 @@ class Model2Python:
         # Todo create unique names for theses
         project_name = 'REST-Servers/NM-' + path.replace('/', '_') + 'Server'
         self.__log.info('Creating Server: ' + project_name)
-        shutil.copytree(resource_filename(Requirement.parse("XWoT_Model_Translator"), 'src/NM_REST-Server-Skeleton'),
+        shutil.copytree(resource_filename(Requirement.parse("XWoT_Model_Translator"), 'xwot/NM_REST-Server-Skeleton'),
                         project_name)
         self.addResourceDefinitions(source, project_name, "")
 

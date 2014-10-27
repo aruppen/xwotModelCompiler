@@ -1,11 +1,11 @@
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 from distutils.command.install_data import install_data
 
 
 def walk_subpkg(name):
     data_files = []
-    package_dir = 'src'
+    package_dir = 'xwot'
     for parent, dirs, files in os.walk(os.path.join(package_dir, name)):
         sub_dir = os.sep.join(parent.split(os.sep)[1:])  # remove package_dir from the path
         for f in files:
@@ -13,12 +13,12 @@ def walk_subpkg(name):
     return data_files
 
 
-packages = ['src']
+
 scripts = ['bin/model2WADL', 'bin/model2Python', 'bin/physical2virtualEntities']
 cmdclass = {'install_data': install_data}
 data_files = [('/etc/Model2WADL/', ['etc/Model2WADL.cfg', 'etc/Physical2Virtual.cfg', 'etc/logging.conf'])]
-package_data = {'src': ['examples/*'],
-                "src": [] + walk_subpkg('REST-Server-Skeleton/') + walk_subpkg('NM_REST-Server-Skeleton/') + walk_subpkg('examples/')}
+package_data = {'xwot': ['examples/*'],
+                "xwot": [] + walk_subpkg('REST-Server-Skeleton/') + walk_subpkg('NM_REST-Server-Skeleton/') + walk_subpkg('examples/')}
 
 # except IndexError: pass
 
@@ -41,7 +41,7 @@ setup(
     license="GPL",
     keywords="WoT IoT REST Arduino xWoT",
     url="http://diufpc46.unifr.ch/projects/projects/thesis",
-    packages=packages,
+    packages=find_packages(),
     package_data=package_data,
     scripts=scripts,
     cmdclass=cmdclass,
