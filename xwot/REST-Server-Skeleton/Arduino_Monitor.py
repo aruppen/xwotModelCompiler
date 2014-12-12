@@ -9,6 +9,10 @@ import logging
 import signal
 import sys
 import os
+from time import sleep
+import Adafruit_DHT
+from publisher import Publisher
+import subprocess
 
 try:
     import serial
@@ -18,24 +22,17 @@ except:
     print 'install them via pip'
     sys.exit()
 
-last_received = '{"temperature":"-100","humidity":"-100"}'
-kill_received = False
 
 
-def receiving(ser):
-    global last_received
-    global kill_received
-    buffer = ''
-    while not kill_received:
-        if kill_received:
-            logging.debug('got kill')
-        buffer = ser.readline()
-        if buffer != '':
-            last_received = buffer
 
 class SerialData(object):
+    """ This class handles the communication with Arduino Boards.
+    """
     def __init__(self, port='/dev/ttyACM1'):
         signal.signal(signal.SIGINT, self.signal_handler)
+        self.__publisher = Publisher()
+        self.__last_received = '{"temperature":"-100","humidity":"-100"}'
+        self.__kill_received = False
         try:
             self.ser =  serial.Serial(
                 port=port,
@@ -52,13 +49,23 @@ class SerialData(object):
             # no serial connection
             self.ser = None
         else:
-            self.__thread = Thread(target=receiving, args=(self.ser,)).start()
+            self.__thread = Thread(target=self.__receiving, args=(self.ser,)).start()
+
+    def __receiving(self, ser):
+        readline = ''
+        while not self.__kill_received:
+            if self.__kill_received:
+                logging.debug('got kill')
+            readline = ser.readline()
+            if readline != '':
+                self.__last_received = readline
+                self.__publisher.publish(self.__last_received)
 
     def next(self):
         if not self.ser:
             return 100  # return anything so we can test when Arduino isn't connected
         for j in range(40):
-            raw_line = last_received
+            raw_line = self.__last_received
             try:
                 # logging.debug(raw_line.strip())
                 return raw_line.strip()
@@ -76,6 +83,44 @@ class SerialData(object):
     def __del__(self):
         if self.ser:
             self.ser.close()
+
+class RPData(object):
+    """This class handles hardware communication with sensors and actuators directly attached to
+    the RPi
+    """
+    def __init__(self):
+        signal.signal(signal.SIGINT, self.signal_handler)
+        self.__lastswitchstate = 1;
+        self.__temperature = -100;
+        self.__humidity = 0;
+        self.__thread = Thread(target=self.__receiving).start()
+        self.__kill_received = False
+        self.__publisher = Publisher()
+
+    def __receiving(self):
+        """This function is called by the thread to update the device"""
+        while not self.__kill_received:
+            if self.__kill_received:
+                logging.debug("Thread got killed")
+            humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, 4)
+            logging.debug("Got temperature reading: "+temperature+" and also got Humidity reading: "+humidity)
+            if self.__temperature != temperature or self.__humidity != humidity:
+                if self.__humidity != 0 and self.__temperature != -100:
+                    self.__publisher.publish({"temperature":temperature,"humidity":humidity, "switch":self.__lastswitchstate})
+                self.__humidity = humidity
+                self.__temperature = temperature
+            sleep(2)
+
+    def next(self):
+        return str('{"temperature":"%5.2f","humidity":"%5.2f", "switch":"%d"}' % (self.__temperature, self.__humidity, self.__lastswitchstate))
+
+    def updateSwitch(self, state):
+        subprocess.call(["sudo", "/usr/local/bin/send433", "11111", "11", str(state)])
+        self.__lastswitchstate = state
+
+    def signal_handler(self, signal, frame):
+        self.__kill_received = True
+        os._exit(1)
 
 
 if __name__ == '__main__':

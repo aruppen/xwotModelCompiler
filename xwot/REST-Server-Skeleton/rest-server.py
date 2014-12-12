@@ -31,6 +31,7 @@ import socket
 import argparse
 
 from Arduino_Monitor import SerialData as DataGen
+from Arduino_Monitor import RPData
 from ZeroconfigService import ZeroconfService
 
 try:
@@ -92,6 +93,8 @@ class RestServer(object):
         service = ZeroconfService(name="Temperature (a) - " + socket.gethostname(), port=self.__port, text=text_entry)
         service.publish()
         data = DataGen(port=self.__device)
+        # or alternatively use
+        data = RPi
         logging.info("Peparing Serial Connection. Please stand by...")
         time.sleep(self.__sdelay)
         logging.info("Up and Running")

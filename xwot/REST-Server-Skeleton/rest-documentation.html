@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>DHT 11 Sensor</title>
+    <title>Smart HVAC</title>
     <link href="/templates/css/application.css?body=1" media="screen" rel="stylesheet"/>
 
     <link rel="stylesheet" href="/templates/css/foundation.css"/>
@@ -11,25 +11,34 @@
 </head>
 <body>
 <header style="margin-bottom: 20px;">
-    <nav class="top-bar">
-        <!-- Area reserved for title -->
+    <nav class="top-bar" data-topbar="topbar" role="navigation">
         <ul class="title-area">
             <li class="name">
-                <h1>
-                    <a href="/">
-                        <i class="fi-anchor"></i>Arduino Simluator</a>
-                </h1>
+                <h1><a href="/">Smart HVAC</a></h1>
             </li>
-            <li class="toggle-topbar menu-icon">
-                <a>Menu</a>
-            </li>
+            <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
+            <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
         </ul>
+
         <section class="top-bar-section">
-            <ul class="left">
-                <li>
-                    <a href="/thermistor">Thermistor</a>
+            <!-- Right Nav Section -->
+            <ul class="right">
+                <!--<li class="active"><a href="/">Documentation</a></li>-->
+                <li class="has-dropdown">
+                    <a href="#">HVAC</a>
+                    <ul class="dropdown">
+                        <li><a href="/hvac/">Status</a></li>
+                        <li><a href="/hvac/pub">Publisher</a></li>
+                    </ul>
                 </li>
             </ul>
+
+            <!-- Left Nav Section -->
+
+            <ul class="left">
+                <li class="active"><a href="/">Documentation</a></li>
+            </ul>
+
         </section>
     </nav>
     <!-- Error Messages -->

@@ -3,6 +3,7 @@ setuptools >= 2.1
 pyserial
 twisted
 autobahn
+requests
 git+https://github.com/square/PonyDebugger.git#egg=ponydebugger
 --allow-external pybonjour
 --allow-unverified pybonjour
