@@ -232,7 +232,7 @@ class Model2Python:
         childSubstitute = '$child'
         if node.getAttribute('uri') == 'pub':
             # set the childSubstitute for the *PublisherResourceAPI class
-            publisherclassname = classname.replace('ResourceAPI', 'ClientResourceAPI')
+            publisherclassname = classname.replace('ResourcePublisherAPI', 'ResourcePublisherClientAPI')
             childSubstitute = "if name == '':" + '\n'
             childSubstitute = childSubstitute + '            ' + 'ServerFactory = HeartRateBroadcastFactory' + '\n'
             childSubstitute = childSubstitute + '            ' + 'factory = ServerFactory("ws://localhost:"+str(self.__port)+"/", self.datagen, debug = False,  debugCodePaths = False)' + '\n'
