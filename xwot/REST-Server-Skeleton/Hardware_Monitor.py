@@ -103,7 +103,7 @@ class RPData(object):
             if self.__kill_received:
                 logging.debug("Thread got killed")
             humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, 4)
-            logging.debug("Got temperature reading: "+temperature+" and also got Humidity reading: "+humidity)
+            logging.debug("Got temperature reading: "+str(temperature)+" and also got Humidity reading: "+str(humidity))
             if self.__temperature != temperature or self.__humidity != humidity:
                 if self.__humidity != 0 and self.__temperature != -100:
                     self.__publisher.publish({"temperature":temperature,"humidity":humidity, "switch":self.__lastswitchstate})
