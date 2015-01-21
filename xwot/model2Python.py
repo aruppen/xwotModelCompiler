@@ -230,9 +230,13 @@ class Model2Python:
         classname = node.getAttribute('name') + "API"
         importsubstitue = '$import'
         childSubstitute = '$child'
-        if node.getAttribute('uri') == 'pub':
+        node_type = node.getAttribute('xsi:type')
+        if node_type == 'xwot:PublisherResource':
             # set the childSubstitute for the *PublisherResourceAPI class
-            publisherclassname = classname.replace('ResourcePublisherAPI', 'ResourcePublisherClientAPI')
+            if 'Publisher' in classname:
+                publisherclassname = classname.replace('Publisher', 'PublisherClient')
+            else:
+                publisherclassname = classname+"PublisherClientResourceAPI"
             childSubstitute = "if name == '':" + '\n'
             childSubstitute = childSubstitute + '            ' + 'ServerFactory = HeartRateBroadcastFactory' + '\n'
             childSubstitute = childSubstitute + '            ' + 'factory = ServerFactory("ws://localhost:"+str(self.__port)+"/", self.datagen, debug = False,  debugCodePaths = False)' + '\n'
