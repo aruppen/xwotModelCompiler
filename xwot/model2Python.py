@@ -67,35 +67,50 @@ class Model2Python:
         self.__schemaFile = self.__m2wConfig.get("Config", "schemaFile")
         self.__model = None
         self.__input = None
+        self.__isNodeManager = True
 
-    def createServers(self, node, path):
+    def createServers(self, node):
+        """Main Entry point to parse the xWoT file
+        Args:
+            node: the root node of the xWoT model
+            path: full URL path of the current resource
+        Returns:
+            nothing
+        """
         node_type = node.getAttribute('xsi:type')
         node_composed = False
         if node.hasAttribute('composed'):
             node_composed = True
-        resourcePath = path + node.getAttribute('uri') + '/'
+        resourcePath = '/' + node.getAttribute('uri') + '/'
         resourcePath = resourcePath.replace('{', '_int:').replace('}', '_')
         if node_type == 'xwot:Resource' and node_composed:
-            # Create a NodeManager service Reflecting the scenario.
+            ## Create a NodeManager service Reflecting the scenario.
             self.createNodeManagerService(node, resourcePath)
+            ## For each child create another service
             for child_node in self.getResourceNodes(node):
                 node_type = child_node.getAttribute('xsi:type')
                 if node_type == 'xwot:SensorResource' or node_type == 'xwot:ActuatorResource' or node_type == 'xwot:ContextResource' or node_type == 'xwot:Resource':
-                    resourcePath = '/'
-                self.createServers(child_node, resourcePath)
+                    self.createServers(child_node)
         else:#if node_type == 'xwot:SensorResource' or node_type == 'xwot:ActuatorResource' or node_type == 'xwot:ContextResource' or node_type == 'xwot:Resource':
             # Create a purly WoT service which runs on a Device.
             self.createPythonService(node, resourcePath)
 
-    def createPythonService(self, source, path):
-        """Handles the creation of on device services"""
+    def createPythonService(self, source_node, path):
+        """Handles the creation of on device services
+        Args:
+            source_node: the node of the xWoT model currently working on
+            path: full URL path of the current resource
+        Returns:
+            nothing
+        """
         # Todo create unique names for theses
+        self.__isNodeManager = False
         project_name = 'REST-Servers/' + path.replace('/', '_') + 'Server'
         self.__log.info('Creating Server: ' + project_name)
         shutil.copytree(resource_filename(Requirement.parse("XWoT_Model_Translator"), 'xwot/REST-Server-Skeleton'),
                         project_name)
-        source.setAttribute('uri', source.getAttribute('uri').replace('{', '').replace('}', ''))
-        self.addResourceDefinitions(source, project_name, "")
+        source_node.setAttribute('uri', source_node.getAttribute('uri').replace('{', '').replace('}', ''))
+        self.addResourceDefinitions(source_node, project_name, "")
 
         #do some cleanup. Essentially remove template parameters.
         filein = open(project_name + '/rest-server.py')
@@ -118,14 +133,21 @@ class Model2Python:
 
         self.cleanupServerProject(project_name)
 
-    def createNodeManagerService(self, source, path):
-        """Handles the creation of NodeManager Services."""
+    def createNodeManagerService(self, source_node, path):
+        """Handles the creation of NodeManager Services.
+        Args:
+            source_node: the node of the xWoT model currently working on
+            path: full URL path of the current resource
+        Returns:
+            nothing
+        """
         # Todo create unique names for theses
+        self.__isNodeManager = True
         project_name = 'REST-Servers/NM-' + path.replace('/', '_') + 'Server'
         self.__log.info('Creating Server: ' + project_name)
         shutil.copytree(resource_filename(Requirement.parse("XWoT_Model_Translator"), 'xwot/NM_REST-Server-Skeleton'),
                         project_name)
-        self.addResourceDefinitions(source, project_name, "")
+        self.addResourceDefinitions(source_node, project_name, "")
 
         #do some cleanup. Essentially remove template parameters.
         filein = open(project_name + '/rest-server.py')
@@ -149,11 +171,18 @@ class Model2Python:
         self.cleanupServerProject(project_name)
 
     def addResourceDefinitions(self, node, project_path, parent_filename):
-        """Creates a new Resource Class for each URL segment"""
+        """Creates a new Resource Class for each URL segment and add some standard behaviour
+        Args:
+            node: the node of the xWoT model currently working on
+            project_path: path name of the current rest-service project
+            parent_filename: python module file name of the parent resource
+        Returns:
+            nothing
+        """
         self.__log.debug("Working on node: " + node.getAttribute('name').replace(" ", ""))
 
         #Create the new resource class
-        new_parent_filename = self.doAddResourceDefinitions(node, project_path, parent_filename)
+        new_parent_filename = self.createResourceFile(node, project_path, parent_filename)
         self.__log.debug("associated file is:  " + new_parent_filename)
         # Fill in the getChild method to delegate the right URL to the right Class
         for resource in self.getResourceNodes(node):
@@ -188,8 +217,10 @@ class Model2Python:
             self.addGETMethod(project_path, new_parent_filename, resource)
             self.addPUTMethod(project_path, new_parent_filename, resource)
         elif wottype == 'xwot:PublisherResource':
-            self.addGETMethod(project_path, new_parent_filename, resource)
-            self.addPOSTMethod(project_path, new_parent_filename, resource)
+            resource['method'] = 'GET'
+            self.addHTMLInfoTableBody(os.path.join(project_path, 'rest-documentation.html'), resource)
+            resource['method'] = 'POST'
+            self.addHTMLInfoTableBody(os.path.join(project_path, 'rest-documentation.html'), resource)
         elif wottype == 'xwot:VResource':
             self.addGETMethod(project_path, new_parent_filename, resource)
             self.addPUTMethod(project_path, new_parent_filename, resource)
@@ -201,10 +232,10 @@ class Model2Python:
         src = string.Template(filein.read())
         if len(self.getResourceNodes(node)) > 0:
             childSubstitute = "else:" + '\n' + "            return " + node.getAttribute(
-                'name') + "API" + "(self.datagen, name, self.__port, '')" + '\n'
+                'name').replace(" ", "") + "API" + "(self.datagen, name, self.__port, '')" + '\n'
         else:
             childSubstitute = "return " + node.getAttribute(
-                'name') + "API" + "(self.datagen, name, self.__port, '')" + '\n'
+                'name').replace(" ", "") + "API" + "(self.datagen, name, self.__port, '')" + '\n'
         importSubstitue = "$import"
         d = {'child': childSubstitute, 'import': importSubstitue}
         result = src.safe_substitute(d)
@@ -223,36 +254,38 @@ class Model2Python:
         service_file.write(result)
         service_file.close()
 
-    def doAddResourceDefinitions(self, node, project_path, parent_filename):
-        """Intantiates a new resourceAPI.py by copy and fills in the $import and $child Templates"""
-        filein = open(project_path + '/resourceAPI.py')
+    def createResourceFile(self, node, project_path, parent_filename):
+        """Intantiates a new resourceAPI_skeleton.py or publisher_skeleton.py by copy and
+        fills in the $import and $child Templates.
+
+        Args:
+            node: the node of the xWoT model currently working on
+            project_path: path name of the current rest-service project
+            parent_filename: python module file name of the parent resource
+        Returns:
+            the full path + name of the created file
+        """
+        node_type = node.getAttribute('xsi:type')
+        if node_type == 'xwot:PublisherResource' and not self.__isNodeManager:
+            filein = open(project_path + '/publisher_skeleton.py')
+        else:
+            filein = open(project_path + '/resourceAPI_skeleton.py')
         src = string.Template(filein.read())
         classname = node.getAttribute('name').replace(" ", "") + "API"
-        importsubstitue = '$import'
         childSubstitute = '$child'
-        node_type = node.getAttribute('xsi:type')
-        if node_type == 'xwot:PublisherResource':
+        importsubstitue = '$import'
+        if node_type == 'xwot:PublisherResource' and not self.__isNodeManager:
             # set the childSubstitute for the *PublisherResourceAPI class
             if 'Publisher' in classname:
-                publisherclassname = classname.replace('Publisher', 'PublisherClient')
+                publisherclientclassname = classname.replace('Publisher', 'PublisherClient')
             else:
-                publisherclassname = classname+"PublisherClientResourceAPI"
-            childSubstitute = "if name == '':" + '\n'
-            childSubstitute = childSubstitute + '            ' + 'ServerFactory = HeartRateBroadcastFactory' + '\n'
-            childSubstitute = childSubstitute + '            ' + 'factory = ServerFactory("ws://localhost:"+str(self.__port)+"/", self.datagen, debug = False,  debugCodePaths = False)' + '\n'
-            childSubstitute = childSubstitute + '            ' + 'factory.protocol = wotStreamerProtocol' + '\n'
-            childSubstitute = childSubstitute + '            ' + 'factory.setProtocolOptions(allowHixie76 = True)' + '\n'
-            childSubstitute = childSubstitute + '            ' + 'return WebSocketResource(factory)' + '\n'
-            childSubstitute = childSubstitute + '        ' + 'else:' + '\n'
-            childSubstitute = childSubstitute + '            ' + "return " + publisherclassname + "(self.datagen, name, self.__port, '')" + '\n'
-            childSubstitute = childSubstitute + '            ' + '' + '\n'
+                publisherclientclassname = classname+"PublisherClientResourceAPI"
+            childSubstitute = publisherclientclassname
 
             # set the import for the *PublisherResourceAPI class
-            importsubstitue = 'from ' + publisherclassname + ' import ' + publisherclassname + '\n'
-            importsubstitue += "from WebSocketSupport import wotStreamerProtocol" + '\n'
-            importsubstitue += "from WebSocketSupport import HeartRateBroadcastFactory" + '\n'
+            importsubstitue = 'from ' + publisherclientclassname + ' import ' + publisherclientclassname + '\n'
             importsubstitue += '$import'
-            self.createPublisherClient(project_path, publisherclassname, parent_filename)
+            self.createPublisherClient(project_path, publisherclientclassname, parent_filename)
 
         d = {'classname': classname, 'child': childSubstitute, 'import': importsubstitue}
         result = src.safe_substitute(d)
@@ -265,6 +298,8 @@ class Model2Python:
         filein = open(project_path + '/rest-server.py')
         class_file_in = string.Template(filein.read())
         classnameClass = classname.lower()
+
+        ## If this is the topmost resource, add it to the rest-server.py file
         if parent_filename == "":
             pathdef = classnameClass + "=" + classname + "(data, '', self.__port, '')" + '\n        ' + "root.putChild('" + node.getAttribute(
                 'uri').replace('{', '').replace('}', '') + "',  " + classnameClass + ")" + '\n        $pathdef'
@@ -279,13 +314,18 @@ class Model2Python:
         return project_path + '/' + classname + '.py'
 
     def createPublisherClient(self, project_path, classname, parent_uri):
-        """Create the  publisher client class"""
-        shutil.copy2(os.path.join(project_path, 'resourceAPI.py'), os.path.join(project_path, classname + '.py'))
+        """Create the  publisher client class
+
+        Args:
+            project_path: path name of the current rest-service project
+            classname: Name of the publisher to create
+            parent_uri: URL of the parent to which this publisher is attached to
+        Returns:
+            nothing
+        """
+        shutil.copy2(os.path.join(project_path, 'publisher_client_skeleton.py'), os.path.join(project_path, classname + '.py'))
         resource = {'name': classname, 'type': 'publisher',
                     'uri': parent_uri + '/pub/{id}'}
-        self.addGETMethod(project_path, os.path.join(project_path, classname + '.py'), resource)
-        self.addPUTMethod(project_path, os.path.join(project_path, classname + '.py'), resource)
-        self.addDELETEMethod(project_path, os.path.join(project_path, classname + '.py'), resource)
         filein = open(project_path + '/' + classname + '.py')
         src = string.Template(filein.read())
         filein.close()
@@ -295,6 +335,14 @@ class Model2Python:
         class_file = open(project_path + '/' + classname + '.py', 'w')
         class_file.write(result)
         class_file.close()
+
+        ## Update the index.html page
+        resource['method'] = 'GET'
+        self.addHTMLInfoTableBody(os.path.join(project_path, 'rest-documentation.html'), resource)
+        resource['method'] = 'PUT'
+        self.addHTMLInfoTableBody(os.path.join(project_path, 'rest-documentation.html'), resource)
+        resource['method'] = 'DELETE'
+        self.addHTMLInfoTableBody(os.path.join(project_path, 'rest-documentation.html'), resource)
 
     def addGETMethod(self, project_path, resourceclassfile, resource):
         methodin = open(project_path + '/render_GET.txt')
@@ -381,7 +429,9 @@ class Model2Python:
         self.regexRemove(project_path, pattern)
         pattern = '.*\.pyc'
         self.regexRemove(project_path, pattern)
-        os.remove(os.path.join(project_path, 'resourceAPI.py'))
+        pattern = '.*_skeleton\.py'
+        self.regexRemove(project_path, pattern)
+
 
     @staticmethod
     def regexRemove(path, pattern):
@@ -410,7 +460,7 @@ class Model2Python:
         try:
             self.__log.info("Start processing")
             logging.debug("Entity is: " + entity.getAttribute('name').replace(" ", "").lower())
-            self.createServers(ve, entity.getAttribute('name').replace(" ", "").lower())
+            self.createServers(ve)
             self.__log.info("Successfully created the necessary service(s)")
         except Exception as err:
             self.__log.error("Something went really wrong")
