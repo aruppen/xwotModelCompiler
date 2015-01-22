@@ -1,0 +1,107 @@
+<html xmlns:t="http://twistedmatrix.com/ns/twisted.web.template/0.1">
+    <head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>DHT 11 Sensor</title>
+        <link href="/templates/css/application.css?body=1" media="screen" rel="stylesheet"/>
+
+        <link rel="stylesheet" href="/templates/css/foundation.css"/>
+        <script src="templates/js/vendor/modernizr.js"></script>
+    </head>
+    <body>
+        <header style="margin-bottom: 20px;">
+            <div class="fixed">
+            <nav class="top-bar" data-topbar="topbar" role="navigation">
+                <ul class="title-area">
+                    <li class="name">
+                        <h1>
+                            <a href="/">Smart HVAC</a>
+                        </h1>
+                    </li>
+                    <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
+                    <li class="toggle-topbar menu-icon">
+                        <a href="#">
+                            <span>Menu</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <section class="top-bar-section">
+                    <!-- Right Nav Section -->
+                    <ul class="right">
+                        <!--<li class="active"><a href="/">Documentation</a></li>-->
+                        <li class="has-dropdown">
+                            <a href="#">HVAC</a>
+                            <ul class="dropdown">
+                                <li>
+                                    <a href="/hvac/">Status</a>
+                                </li>
+                                <li class="active">
+                                    <a href="/hvac/pub">Publisher</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <!-- Left Nav Section -->
+                    <ul class="left">
+                        <li class="active">
+                            <a href="/">Documentation</a>
+                        </li>
+                    </ul>
+                </section>
+            </nav>
+            <!-- Error Messages -->
+            </div>
+        </header>
+        <div id="body_content" class="row">
+            <div class="column large-10 large-centered">
+                <div class="row">
+                    <div class="columns large-3 panel">
+                        <div class="panel callout radius">
+                            <div class="row"></div>
+                            You can now check the list of subscribers.
+                        </div>
+
+                    </div>
+                    <div id="arduinoContainer" class="columns large-7 panel">
+                        <div class="row arduino1234">
+                            <div class="panel callout radius">
+                                <div class="fi-eject right"></div>
+                                <div class="row">
+                                    <span class="label">Subscribers</span>
+                                </div>
+
+                                <div class="row">
+
+                                    <ul xmlns:t="http://twistedmatrix.com/ns/twisted.web.template/0.1">
+                                        <li t:render="myclients">
+                                            <a>
+                                                <t:attr name="href">/lb/pub/<t:slot name="id"/></t:attr>
+                                                <t:slot name="uri"/>
+                                                -
+                                                <t:slot name="method"/>
+                                                -
+                                                <t:slot name="accept"/>
+                                            </a>
+                                        </li>
+                                    </ul>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+    <footer style="background-color: #f0f0f0;">
+        <div style="text-align: right;">Andreas Ruppen</div>
+    </footer>
+    <script src="/templates/js/vendor/jquery.js"></script>
+    <script src="/templates/js/foundation.min.js"></script>
+    <script>
+        $(document).foundation();
+    </script>
+</html>
+
