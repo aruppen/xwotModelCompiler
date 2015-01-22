@@ -150,7 +150,7 @@ class Model2Python:
 
     def addResourceDefinitions(self, node, project_path, parent_filename):
         """Creates a new Resource Class for each URL segment"""
-        self.__log.debug("Working on node: " + node.getAttribute('name'))
+        self.__log.debug("Working on node: " + node.getAttribute('name').replace(" ", ""))
 
         #Create the new resource class
         new_parent_filename = self.doAddResourceDefinitions(node, project_path, parent_filename)
@@ -159,7 +159,7 @@ class Model2Python:
         for resource in self.getResourceNodes(node):
             filein = open(new_parent_filename)
             src = string.Template(filein.read())
-            classname = resource.getAttribute('name') + "API"
+            classname = resource.getAttribute('name').replace(" ", "") + "API"
             if '{' in resource.getAttribute('uri'):
                 childSubstitute = 'if name.isdigit():' + '\n' + "            return " + classname + "(self.datagen, name, self.__port, '')" + '\n' + "        $child"
             else:
@@ -174,7 +174,7 @@ class Model2Python:
             class_file.close()
             self.addResourceDefinitions(resource, project_path, parent_filename + '/' + node.getAttribute('uri'))
         # Add all the methods:
-        resource = {'name': node.getAttribute('name'), 'type': node.getAttribute('xsi:type'),
+        resource = {'name': node.getAttribute('name').replace(" ", ""), 'type': node.getAttribute('xsi:type'),
                     'uri': parent_filename + '/' + node.getAttribute('uri')}
         wottype = node.getAttribute('xsi:type')
         if wottype == 'xwot:SensorResource':
@@ -214,12 +214,12 @@ class Model2Python:
         class_file.close()
 
         #do some cleanup. Essentially remove template parameters.
-        filein = open(project_path + '/' + node.getAttribute('name') + "API" + '.py')
+        filein = open(project_path + '/' + node.getAttribute('name').replace(" ", "") + "API" + '.py')
         src = string.Template(filein.read())
         r = {'classname': '', 'child': '', 'import': '', 'render_method': ''}
         result = src.safe_substitute(r)
         filein.close()
-        service_file = open(project_path + '/' + node.getAttribute('name') + "API" + '.py', "w")
+        service_file = open(project_path + '/' + node.getAttribute('name').replace(" ", "") + "API" + '.py', "w")
         service_file.write(result)
         service_file.close()
 
@@ -227,7 +227,7 @@ class Model2Python:
         """Intantiates a new resourceAPI.py by copy and fills in the $import and $child Templates"""
         filein = open(project_path + '/resourceAPI.py')
         src = string.Template(filein.read())
-        classname = node.getAttribute('name') + "API"
+        classname = node.getAttribute('name').replace(" ", "") + "API"
         importsubstitue = '$import'
         childSubstitute = '$child'
         node_type = node.getAttribute('xsi:type')
@@ -409,8 +409,8 @@ class Model2Python:
         ve = self.__model.getElementsByTagName('VirtualEntity')[0]
         try:
             self.__log.info("Start processing")
-            logging.debug("Entity is: " + entity.getAttribute('name').lower())
-            self.createServers(ve, entity.getAttribute('name').lower())
+            logging.debug("Entity is: " + entity.getAttribute('name').replace(" ", "").lower())
+            self.createServers(ve, entity.getAttribute('name').replace(" ", "").lower())
             self.__log.info("Successfully created the necessary service(s)")
         except Exception as err:
             self.__log.error("Something went really wrong")
