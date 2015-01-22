@@ -11,7 +11,7 @@ import sys
 import os
 from time import sleep
 import Adafruit_DHT
-from publisher import Publisher
+from Publisher import Publisher
 import subprocess
 
 try:
