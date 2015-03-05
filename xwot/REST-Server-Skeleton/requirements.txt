@@ -8,5 +8,5 @@ git+https://github.com/square/PonyDebugger.git#egg=ponydebugger
 --allow-external pybonjour
 --allow-unverified pybonjour
 ## The remainder are Raspberri pi specifi requirements
-#git+https://github.com/adafruit/Adafruit_Python_DHT.git#egg=Adafruit-Python-DHT
+#-e git+https://github.com/adafruit/Adafruit_Python_DHT#egg=Adafruit-DHT
 #wiringpi2
