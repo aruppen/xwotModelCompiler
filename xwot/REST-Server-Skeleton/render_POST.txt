@@ -3,7 +3,7 @@
         # TODO implement this
         json_data = json.loads('{"temperature":"-100","humidity":"-100"}')
         logging.debug(request.requestHeaders)
-        accept_type = request.requestHeaders.getRawHeaders("Accept")[0]
+        accept_type = request.requestHeaders.getRawHeaders("Accept")[0].split(',')[0]
         if not None:
             if accept_type == "application/json":
                 request.setHeader("Content-Type", "application/json; charset=UTF-8")

@@ -5,7 +5,7 @@
         json_data = json.loads(self.data)
         # pprint(request.__dict__)
         logging.debug(request.requestHeaders)
-        accept_type = request.requestHeaders.getRawHeaders("Accept")[0]
+        accept_type = request.requestHeaders.getRawHeaders("Accept")[0].split(',')[0]
         if not None:
             if "application/json" in accept_type:
                 request.setResponseCode(200)
