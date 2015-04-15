@@ -70,6 +70,10 @@ class $classname(resource.Resource):
         logging.debug(request.requestHeaders)
         accept_type = request.requestHeaders.getRawHeaders("Accept")[0]
         client = self.__getClient()
+        request.setHeader('Access-Control-Allow-Origin', '*')
+        request.setHeader('Access-Control-Allow-Methods', 'GET, PUT, DELETE')
+        request.setHeader('Access-Control-Allow-Headers', 'x-prototype-version,x-requested-with')
+        request.setHeader('Access-Control-Max-Age', 2520) # 42 hours
         if not None:
             if accept_type == "application/json":
                 request.setHeader("Content-Type", "application/json; charset=UTF-8")
@@ -93,6 +97,10 @@ class $classname(resource.Resource):
         logging.debug(request.requestHeaders)
         accept_type = request.requestHeaders.getRawHeaders("Accept")[0]
         client = self.__getClient()
+        request.setHeader('Access-Control-Allow-Origin', '*')
+        request.setHeader('Access-Control-Allow-Methods', 'GET, PUT, DELETE')
+        request.setHeader('Access-Control-Allow-Headers', 'x-prototype-version,x-requested-with')
+        request.setHeader('Access-Control-Max-Age', 2520) # 42 hours
         if not None:
             if accept_type == "application/json":
                 request.setHeader("Content-Type", "application/json; charset=UTF-8")
@@ -119,6 +127,10 @@ class $classname(resource.Resource):
         logging.debug(request.requestHeaders)
         accept_type = request.requestHeaders.getRawHeaders("Accept")[0]
         client = self.__getClient()
+        request.setHeader('Access-Control-Allow-Origin', '*')
+        request.setHeader('Access-Control-Allow-Methods', 'GET, PUT, DELETE')
+        request.setHeader('Access-Control-Allow-Headers', 'x-prototype-version,x-requested-with')
+        request.setHeader('Access-Control-Max-Age', 2520) # 42 hours
         if not None:
             if accept_type == "application/json":
                 request.setHeader("Content-Type", "application/json; charset=UTF-8")

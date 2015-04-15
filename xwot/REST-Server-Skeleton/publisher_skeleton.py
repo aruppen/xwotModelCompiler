@@ -73,6 +73,10 @@ class $classname(resource.Resource):
         logging.debug(request.requestHeaders)
         accept_type = request.requestHeaders.getRawHeaders("Accept")[0]
         clients = ""
+        request.setHeader('Access-Control-Allow-Origin', '*')
+        request.setHeader('Access-Control-Allow-Methods', 'GET, POST')
+        request.setHeader('Access-Control-Allow-Headers', 'x-prototype-version,x-requested-with')
+        request.setHeader('Access-Control-Max-Age', 2520) # 42 hours
         if not None:
             if accept_type == "application/json":
                 request.setHeader("Content-Type", "application/json; charset=UTF-8")
@@ -104,6 +108,10 @@ class $classname(resource.Resource):
         logging.debug(request.requestHeaders)
         accept_type = request.requestHeaders.getRawHeaders("Accept")[0]
         lastrowid = self.__insertClient(json_data['uri'], json_data['method'], json_data['accept'])
+        request.setHeader('Access-Control-Allow-Origin', '*')
+        request.setHeader('Access-Control-Allow-Methods', 'GET, POST')
+        request.setHeader('Access-Control-Allow-Headers', 'x-prototype-version,x-requested-with')
+        request.setHeader('Access-Control-Max-Age', 2520) # 42 hours
         if not None:
             if accept_type == "application/json":
                 request.setHeader("Content-Type", "application/json; charset=UTF-8")
