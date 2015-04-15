@@ -65,6 +65,15 @@ class $classname(resource.Resource):
         conn.close()
         return result
 
+    def render_OPTIONS(self, request):
+        request.setResponseCode(http.NO_CONTENT)
+        request.setHeader('Access-Control-Allow-Origin', '*')
+        request.setHeader('Access-Control-Allow-Methods', 'GET, PUT, DELETE')
+        request.setHeader('Access-Control-Allow-Headers', 'x-prototype-version,x-requested-with')
+        request.setHeader('Access-Control-Max-Age', 2520) # 42 hours
+        logging.debug(request.requestHeaders)
+        return ""
+
     def render_GET(self, request):
         """Handles GET requests"""
         logging.debug(request.requestHeaders)

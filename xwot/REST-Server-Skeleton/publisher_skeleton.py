@@ -62,6 +62,15 @@ class $classname(resource.Resource):
         conn.close()
         return subscriberid
 
+    def render_OPTIONS(self, request):
+        request.setResponseCode(http.NO_CONTENT)
+        request.setHeader('Access-Control-Allow-Origin', '*')
+        request.setHeader('Access-Control-Allow-Methods', 'GET, POST')
+        request.setHeader('Access-Control-Allow-Headers', 'x-prototype-version,x-requested-with')
+        request.setHeader('Access-Control-Max-Age', 2520) # 42 hours
+        logging.debug(request.requestHeaders)
+        return ""
+
     def render_GET(self, request):
         """Handles GET requests. Shows the list of clients"""
         # TODO implement this

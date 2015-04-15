@@ -3,13 +3,17 @@
         # TODO implement this
         json_data = json.loads('{"temperature":"-100","humidity":"-100"}')
         logging.debug(request.requestHeaders)
-        accept_type = request.requestHeaders.getRawHeaders("Accept")[0]
+        accept_type = request.requestHeaders.getRawHeaders("Accept")[0].split(',')[0]
+        request.setHeader('Access-Control-Allow-Origin', '*')
+        request.setHeader('Access-Control-Allow-Methods', 'DELETE')
+        request.setHeader('Access-Control-Allow-Headers', 'x-prototype-version,x-requested-with')
+        request.setHeader('Access-Control-Max-Age', 2520) # 42 hours
         if not None:
-            if accept_type == "application/json":
+            if "application/json" in accept_type:
                 request.setHeader("Content-Type", "application/json; charset=UTF-8")
                 request.setResponseCode(200)
                 # TODO implement JSON response
-            elif accept_type == "application/xml":
+            elif "application/xml" in accept_type:
                 request.setHeader("Content-Type", "application/xml; charset=UTF-8")
                 request.setResponseCode(200)
                 # TODO implement XML response
@@ -18,4 +22,5 @@
                 flattenString(request, ExampleElement(json_data['temperature'], json_data['humidity'])).addCallback(
                     request.write)
                 request.finish()
+                return NOT_DONE_YET
                 # TODO implement HTML response

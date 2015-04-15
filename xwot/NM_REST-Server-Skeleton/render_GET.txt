@@ -1,15 +1,21 @@
-    def render_DELETE(self, request):
-        """Handles DELETE request"""
+    def render_GET(self, request):
+        """Handles GET requests"""
         # TODO implement this
-        json_data = json.loads('{"temperature":"-100","humidity":"-100"}')
+        self.data = self.datagen.next()
+        json_data = json.loads(self.data)
+        # pprint(request.__dict__)
         logging.debug(request.requestHeaders)
-        accept_type = request.requestHeaders.getRawHeaders("Accept")[0]
+        accept_type = request.requestHeaders.getRawHeaders("Accept")[0].split(',')[0]
+        request.setHeader('Access-Control-Allow-Origin', '*')
+        request.setHeader('Access-Control-Allow-Methods', 'GET')
+        request.setHeader('Access-Control-Allow-Headers', 'x-prototype-version,x-requested-with')
+        request.setHeader('Access-Control-Max-Age', 2520) # 42 hours
         if not None:
-            if accept_type == "application/json":
-                request.setHeader("Content-Type", "application/json; charset=UTF-8")
+            if "application/json" in accept_type:
                 request.setResponseCode(200)
+                request.setHeader("Content-Type", "application/json; charset=UTF-8")
                 # TODO implement JSON response
-            elif accept_type == "application/xml":
+            elif "application/xml" in accept_type:
                 request.setHeader("Content-Type", "application/xml; charset=UTF-8")
                 request.setResponseCode(200)
                 # TODO implement XML response
@@ -19,3 +25,4 @@
                     request.write)
                 request.finish()
                 # TODO implement HTML response
+                return NOT_DONE_YET

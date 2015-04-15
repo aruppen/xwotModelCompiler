@@ -36,6 +36,15 @@ class $classname(resource.Resource):
         self.__port = port
         self.datagen = datagen
 
+    def render_OPTIONS(self, request):
+        request.setResponseCode(http.NO_CONTENT)
+        request.setHeader('Access-Control-Allow-Origin', '*')
+        request.setHeader('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE')
+        request.setHeader('Access-Control-Allow-Headers', 'x-prototype-version,x-requested-with')
+        request.setHeader('Access-Control-Max-Age', 2520) # 42 hours
+        logging.debug(request.requestHeaders)
+        return ""
+
 $render_method
 
 
