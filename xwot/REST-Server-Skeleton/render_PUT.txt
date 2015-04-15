@@ -22,4 +22,5 @@
                 flattenString(request, ExampleElement(json_data['temperature'], json_data['humidity'])).addCallback(
                     request.write)
                 request.finish()
+                return NOT_DONE_YET
                 # TODO implement HTML response

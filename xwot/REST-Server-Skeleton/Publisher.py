@@ -19,7 +19,7 @@ class Publisher():
     def __getConditions(self, clientid):
         conn = sqlite3.connect('clients.db')
         c = conn.cursor()
-        c.execute("select * from SensorEvent where subscriberid='"+clientid+"'")
+        c.execute("select * from SensorEvent where subscriberid='"+str(clientid)+"'")
         result = c.fetchall()
         c.close()
         conn.close()
