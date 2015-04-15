@@ -132,7 +132,7 @@ class $classname(resource.Resource):
                 return str('<client><id>%s</id><uri>%s</uri><method>%s</method><accept>%s</accept></client>' % (lastrowid, json_data['uri'], json_data['method'], json_data['accept']))
             else:
                 request.write("<!DOCTYPE html>\n")
-                flattenString(request, ClientElement(lastrowid, json_data['uri'], json_data['method'], json_data['accept'])).addCallback(
+                flattenString(request, ClientElement(lastrowid, json_data['uri'], json_data['method'], json_data['accept'], '')).addCallback(
                     request.write)
                 request.finish()
 

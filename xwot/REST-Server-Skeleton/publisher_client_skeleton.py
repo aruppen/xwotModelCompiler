@@ -121,7 +121,7 @@ class $classname(resource.Resource):
                 return str('<client><id>%s</id><uri>%s</uri><method>%s</method><accept>%s</accept></client>' % (client[0], client[1], client[2], client[3]))
             else:
                 request.write("<!DOCTYPE html>\n")
-                flattenString(request, ClientElement(client[0], client[1], client[2], client[3])).addCallback(
+                flattenString(request, ClientElement(client[0], client[1], client[2], client[3], '')).addCallback(
                     request.write)
                 request.finish()
                 return NOT_DONE_YET
@@ -151,7 +151,7 @@ class $classname(resource.Resource):
                 return str('<client><id>%s</id><uri>%s</uri><method>%s</method><accept>%s</accept></client>' % (client[0], client[1], client[2], client[3]))
             else:
                 request.write("<!DOCTYPE html>\n")
-                flattenString(request, ClientElement(client[0], client[1], client[2], client[3])).addCallback(
+                flattenString(request, ClientElement(client[0], client[1], client[2], client[3], '')).addCallback(
                     request.write)
                 request.finish()
                 return NOT_DONE_YET

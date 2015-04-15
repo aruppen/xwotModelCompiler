@@ -66,26 +66,17 @@
                             <div class="panel callout radius">
                                 <div class="fi-eject right"></div>
                                 <div class="row">
-                                    <span class="label">Client Details</span>
+                                    <span class="label">Client <span t:render="clientid"></span></span>
                                 </div>
-                                <div class="row">
-                                    <ul xmlns:t="http://twistedmatrix.com/ns/twisted.web.template/0.1">
-                                        <div>
-                                            <li>
-                                                <span t:render="idContent"/>
-                                            </li>
-                                            <li>
-                                                <span t:render="uriContent"/>
-                                            </li>
-                                            <li>
-                                                <span t:render="methodContent"/>
-                                            </li>
-                                            <li>
-                                                <span t:render="acceptContent"/>
-                                            </li>
 
-                                        </div>
-                                    </ul>
+                                <div class="row">
+
+                                    <dl>
+                                    <dt>URL</dt><dd><span t:render="clienturl"></span></dd>
+                                    <dt>Accpet</dt><dd><span t:render="clientaccept"></span></dd>
+                                    <dt>Method</dt><dd><span t:render="clientmethod"></span></dd>
+                                    <dt>Conditions</dt><dd><div t:render="clientdata"></div></dd>
+                                    </dl>
                                 </div>
                             </div>
                         </div>
