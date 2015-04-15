@@ -49,15 +49,18 @@ class $classname(resource.Resource):
         conn.close()
         return result
 
-    def __insertClient(self, uri, method, accept):
+    def __insertClient(self, uri, method, accept, event=''):
         conn = sqlite3.connect('clients.db')
         c = conn.cursor()
         c.execute("insert into Subscriber (uri, method, accept, resourceid) values ('"+uri+"', '"+method+"', '"+accept+"', 1)")
+        subscriberid = c.lastrowid
+        conn.commit()
+        c.execute("insert into SensorEvent (data, subscriberid) values ('"+event+"', '"+str(subscriberid)+"')");
         result = c.lastrowid
         conn.commit()
         c.close()
         conn.close()
-        return result
+        return subscriberid
 
     def render_GET(self, request):
         """Handles GET requests. Shows the list of clients"""

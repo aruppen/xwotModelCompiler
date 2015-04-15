@@ -7,7 +7,7 @@ class Publisher():
     def __init__(self):
         self.__database = 'clients.db'
 
-    def __executeQuery(self,query):
+    def __getClients(self,query):
         conn = sqlite3.connect('clients.db')
         c = conn.cursor()
         c.execute("Select * from Subscriber where resourceid=1 order by id")
@@ -16,10 +16,21 @@ class Publisher():
         conn.close()
         return result
 
+    def __getConditions(self, clientid):
+        conn = sqlite3.connect('clients.db')
+        c = conn.cursor()
+        c.execute("select * from SensorEvent where subscriberid='"+clientid+"'")
+        result = c.fetchall()
+        c.close()
+        conn.close()
+        return result
+
     def publish(self, values):
         """Entry point for external scripts to send a notification to all subscribers"""
-        clients = self.__executeQuery("Select * from Subscriber where resourceid=1 order by id")
+        clients = self.__getClients("Select * from Subscriber where resourceid=1 order by id")
         for client in clients:
+            conditions = self.__getConditions(client[0])
+            #TODO check if conditions is met
             #TODO do this in a new thread for each client
             self.__updateClient(client, values)
 
