@@ -3,7 +3,7 @@ import logging
 import json
 
 try:
-    from twisted.web import resource
+    from twisted.web import resource, http
     from twisted.web.template import Element, renderer, XMLFile, flattenString
     from twisted.web.server import Site, NOT_DONE_YET
     from twisted.web.static import File
@@ -34,6 +34,15 @@ class $classname(resource.Resource):
         self.__pathname = pathname
         self.__port = port
         self.datagen = datagen
+
+    def render_OPTIONS(self, request):
+        request.setResponseCode(http.NO_CONTENT)
+        request.setHeader('Access-Control-Allow-Origin', '*')
+        request.setHeader('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE')
+        request.setHeader('Access-Control-Allow-Headers', 'x-prototype-version,x-requested-with')
+        request.setHeader('Access-Control-Max-Age', 2520) # 42 hours
+        logging.debug(request.requestHeaders)
+        return ""
 
     def render_GET(self, request):
         """Handles GET requests"""

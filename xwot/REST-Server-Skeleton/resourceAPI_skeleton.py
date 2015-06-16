@@ -4,7 +4,7 @@ import time
 import json
 
 try:
-    from twisted.web import resource
+    from twisted.web import resource, http
     from twisted.web.template import Element, renderer, XMLFile, flattenString
     from twisted.web.server import Site, NOT_DONE_YET
     from twisted.web.static import File
