@@ -1,8 +1,0 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-from xwot.model2Python import Model2Python
-import sys
-
-prog = Model2Python()
-prog.getArguments(sys.argv[1:])

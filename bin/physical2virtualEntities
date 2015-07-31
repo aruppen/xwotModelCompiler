@@ -1,8 +1,0 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-from xwot.physical2virtualEntities import Physical2VirtualEntities
-import sys
-
-prog = Physical2VirtualEntities()
-prog.getArguments(sys.argv[1:])
