@@ -33,7 +33,7 @@ def read(fname):
 
 setup(
     name="xWoTModelTranslator",
-    version="1.1",
+    version="1.3",
     author="Andreas Ruppen",
     author_email="andreas.ruppen@unifr.ch",
     description="Translates xWoT models into various code snippets",
