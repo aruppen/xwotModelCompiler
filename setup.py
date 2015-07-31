@@ -39,7 +39,7 @@ setup(
     description="Translates xWoT models into various code snippets",
     license="Apache",
     keywords="WoT IoT REST Arduino xWoT",
-    url="http://diufpc46.unifr.ch/projects/projects/thesis",
+    url="https://github.com/aruppen/xwotModelCompiler",
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     package_data = package_data,
     entry_points={
