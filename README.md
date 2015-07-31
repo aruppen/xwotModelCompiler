@@ -6,7 +6,7 @@ Convert an xWoT meta-model to executable python code.
 
 ## End Users
 
-    pip install exaManagementSystem
+    pip install xWoTModelTranslator
     
 ## Developers
 
