@@ -32,7 +32,7 @@ def read(fname):
 
 setup(
     name="xWoTModelTranslator",
-    version="1.3",
+    version="1.4",
     author="Andreas Ruppen",
     author_email="andreas.ruppen@unifr.ch",
     description="Translates xWoT models into various code snippets",
@@ -45,7 +45,7 @@ setup(
         'console_scripts': [
             'model2Python=Model2Python:main',
             'model2WADL=Model2WADL:main',
-            'pyhsical2virtualEntities=Physical2VirtualEntities:main'
+            'physical2virtualEntities=Physical2VirtualEntities:main'
         ],
     },
     cmdclass=cmdclass,
