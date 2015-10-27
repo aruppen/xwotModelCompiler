@@ -6,7 +6,7 @@ from pip.req import parse_requirements
 
 def walk_subpkg(name):
     data_files = []
-    package_dir = 'xwot'
+    package_dir = 'xwot1'
     for parent, dirs, files in os.walk(os.path.join(package_dir, name)):
         sub_dir = os.sep.join(parent.split(os.sep)[1:])  # remove package_dir from the path
         for f in files:
@@ -17,7 +17,7 @@ def walk_subpkg(name):
 
 cmdclass = {'install_data': install_data}
 data_files = [('/etc/Model2WADL/', ['etc/Model2WADL.cfg', 'etc/Physical2Virtual.cfg', 'etc/logging.conf'])]
-package_data = {"xwot": [] + walk_subpkg('REST-Server-Skeleton/') + walk_subpkg('NM_REST-Server-Skeleton/')}
+package_data = {"xwot1": [] + walk_subpkg('REST-Server-Skeleton/') + walk_subpkg('NM_REST-Server-Skeleton/')}
 # parse_requirements() returns generator of pip.req.InstallRequirement objects
 install_reqs = parse_requirements('requirements.txt')
 reqs = [str(ir.req) for ir in install_reqs]
@@ -43,9 +43,9 @@ setup(
     package_data = package_data,
     entry_points={
         'console_scripts': [
-            'model2Python=xwot:m2p',
-            'model2WADL=xwot:m2w',
-            'physical2virtualEntities=xwot:p2v'
+            'model2Python=xwot1.cmd:m2p',
+            'model2WADL=xwot1.cmd:m2w',
+            'physical2virtualEntities=xwot1.cmd:p2v'
         ],
     },
     cmdclass=cmdclass,

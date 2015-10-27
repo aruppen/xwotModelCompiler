@@ -1,7 +1,9 @@
+__author__ = 'ruppena'
+
 import sys
-from model2Python import Model2Python
-from model2WADL import Model2WADL
-from physical2virtualEntities import Physical2VirtualEntities
+from xwot1.model2Python import Model2Python
+from xwot1.model2WADL import Model2WADL
+from xwot1.physical2virtualEntities import Physical2VirtualEntities
 
 def p2v():
     """Entry point for the application script"""

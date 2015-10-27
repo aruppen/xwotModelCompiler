@@ -8,8 +8,8 @@ class ExampleElement(Element):
     def __init__(self, temp,  hum):
         self.temperature = temp
         self.hummidity = hum
-        self.extraTemperatureContent = XMLString('<input id="temperature" type="range" min="-100" max="100" value="'+self.temperature+'" class="xwot sensor columns large-12" />')
-        self.extraHumidityContent = XMLString('<input id="humidity" type="range" min="0" max="100" value="'+self.hummidity+'" class="xwot sensor columns large-12" />')
+        self.extraTemperatureContent = XMLString('<input id="temperature" type="range" min="-100" max="100" value="'+self.temperature+'" class="xwot1 sensor columns large-8" />')
+        self.extraHumidityContent = XMLString('<input id="humidity" type="range" min="0" max="100" value="'+self.hummidity+'" class="xwot1 sensor columns large-8" />')
 
     @renderer
     def header(self, request, tag):

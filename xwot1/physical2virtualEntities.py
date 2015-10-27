@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # #############################################################################################################
-# Takes a xwot specification adds the virtual parts #
+# Takes a xwot1 specification adds the virtual parts #
 # ---------------------------------------------------------------------------------------------------------- #
 # #
 # Author: Andreas Ruppen                                                                                     #
@@ -65,6 +65,7 @@ class Physical2VirtualEntities:
         self.__output = None
 
     def __setupxWoT(self):
+        self.__log.debug("Enter __setupxWoT")
         self.__xwot = xml.dom.minidom.Document()
 
         rootElement = self.__xwot.createElementNS('http://diuf.unifr.ch/softeng', 'xwot:Entity')
@@ -76,6 +77,7 @@ class Physical2VirtualEntities:
         self.__xwot.appendChild(rootElement)
 
     def __createVirtualEntities(self):
+        self.__log.debug("Enter __createVirtualEntities")
         """For each physical device a virtual counterpart is created. Since some combinations of Sensor/Actuator result in a Context resource, the user is asked for some input"""
         root = self.__xwot.documentElement
 
@@ -111,6 +113,7 @@ class Physical2VirtualEntities:
             root.appendChild(ve)
 
     def __addResources(self, targetPhysicalEntity, sourceNode, targetNode):
+        self.__log.debug("Enter __addResources")
         vent = self.__xwot.createElement('Resource')
         ename = sourceNode.getAttribute('name')
         etype = sourceNode.getAttribute('xsi:type')
@@ -146,6 +149,7 @@ class Physical2VirtualEntities:
                 yield child
 
     def __searchForContextResources(self, inputNodeList, targetPhysicalEntity, parentDestinationNode):
+        self.__log.debug("Enter __searchForContextResources")
         doAskAgain = (True if len(inputNodeList) > 1 else False)
         while doAskAgain and len(inputNodeList) > 1:
             print('I have found the following Nodes:')
@@ -175,6 +179,7 @@ class Physical2VirtualEntities:
         return inputNodeList
 
     def __createContextResource(self, firstElement, secondElement, parentDestinationNode):
+        self.__log.debug("Enter __createContextResource")
         vent = self.__xwot.createElement('Resource')
         ename = firstElement.getAttribute('name') + secondElement.getAttribute('name')
 
@@ -188,6 +193,7 @@ class Physical2VirtualEntities:
             self.__createPublisherResource(vent)
 
     def __createPublisherResource(self, parentDestinationNode):
+        self.__log.debug("Enter __createPublisherResource")
         ename = parentDestinationNode.getAttribute('name')
         publisher = self.__xwot.createElement('Resource')
         publisher.setAttribute('xsi:type', 'xwot:PublisherResource')
@@ -203,12 +209,14 @@ class Physical2VirtualEntities:
             i += 1
 
     def simplify(self):
+        self.__log.debug("Enter simplify")
         virtualEntity = self.__xwot.getElementsByTagName('VirtualEntity')[0]
         resources = self.__filterChildrenByTagName(virtualEntity, 'Resource')
         for resource in resources:
             self.__doSimplify(resource)
 
     def __doSimplify(self, resource):
+        self.__log.debug("Enter __doSimplify")
         self.__log.debug('Working on Node: ' + resource.getAttribute('name'))
         self.__log.debug('Has ' + str(len(resource.childNodes)) + ' children')
         if len(resource.childNodes) == 1 and resource.childNodes[0].getAttribute('uri') != 'pub':
@@ -238,10 +246,10 @@ class Physical2VirtualEntities:
 
     def getArguments(self, argv):
         parser = argparse.ArgumentParser()
-        parser.add_argument("-i", "--input", help="input xwot file containing the Model to be translated",
+        parser.add_argument("-i", "--input", help="input xwot1 file containing the Model to be translated",
                             required=True)
         parser.add_argument("-o", "--output",
-                            help="output xwot file containing the Model enhanced with the virtual entities",
+                            help="output xwot1 file containing the Model enhanced with the virtual entities",
                             required=True)
         args = parser.parse_args(argv)
         self.__input = args.input

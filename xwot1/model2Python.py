@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # #############################################################################################################
-# Takes a xwot specification and creates a valid WADL file #
+# Takes a xwot: specification and creates a valid WADL file #
 # ---------------------------------------------------------------------------------------------------------- #
 # #
 # Author: Andreas Ruppen                                                                                     #
@@ -83,15 +83,15 @@ class Model2Python:
             node_composed = True
         resourcePath = '/' + node.getAttribute('uri') + '/'
         resourcePath = resourcePath.replace('{', '_int:').replace('}', '_')
-        if node_type == 'xwot:Resource' and node_composed:
+        if node_type == 'xwot::Resource' and node_composed:
             ## Create a NodeManager service Reflecting the scenario.
             self.createNodeManagerService(node, resourcePath)
             ## For each child create another service
             for child_node in self.getResourceNodes(node):
                 node_type = child_node.getAttribute('xsi:type')
-                if node_type == 'xwot:SensorResource' or node_type == 'xwot:ActuatorResource' or node_type == 'xwot:ContextResource' or node_type == 'xwot:Resource':
+                if node_type == 'xwot::SensorResource' or node_type == 'xwot::ActuatorResource' or node_type == 'xwot::ContextResource' or node_type == 'xwot::Resource':
                     self.createServers(child_node)
-        else:#if node_type == 'xwot:SensorResource' or node_type == 'xwot:ActuatorResource' or node_type == 'xwot:ContextResource' or node_type == 'xwot:Resource':
+        else:#if node_type == 'xwot::SensorResource' or node_type == 'xwot::ActuatorResource' or node_type == 'xwot::ContextResource' or node_type == 'xwot::Resource':
             # Create a purly WoT service which runs on a Device.
             self.createPythonService(node, resourcePath)
 
@@ -107,7 +107,7 @@ class Model2Python:
         self.__isNodeManager = False
         project_name = 'REST-Servers/' + path.replace('/', '_') + 'Server'
         self.__log.info('Creating Server: ' + project_name)
-        shutil.copytree(resource_filename(Requirement.parse("XWoT_Model_Translator"), 'xwot/REST-Server-Skeleton'),
+        shutil.copytree(resource_filename(Requirement.parse("XWoT_Model_Translator"), 'xwot:/REST-Server-Skeleton'),
                         project_name)
         source_node.setAttribute('uri', source_node.getAttribute('uri').replace('{', '').replace('}', ''))
         self.addResourceDefinitions(source_node, project_name, "")
@@ -145,7 +145,7 @@ class Model2Python:
         self.__isNodeManager = True
         project_name = 'REST-Servers/NM-' + path.replace('/', '_') + 'Server'
         self.__log.info('Creating Server: ' + project_name)
-        shutil.copytree(resource_filename(Requirement.parse("XWoT_Model_Translator"), 'xwot/NM_REST-Server-Skeleton'),
+        shutil.copytree(resource_filename(Requirement.parse("XWoT_Model_Translator"), 'xwot:/NM_REST-Server-Skeleton'),
                         project_name)
         self.addResourceDefinitions(source_node, project_name, "")
 
@@ -206,22 +206,22 @@ class Model2Python:
         resource = {'name': node.getAttribute('name').replace(" ", ""), 'type': node.getAttribute('xsi:type'),
                     'uri': parent_filename + '/' + node.getAttribute('uri')}
         wottype = node.getAttribute('xsi:type')
-        if wottype == 'xwot:SensorResource':
+        if wottype == 'xwot::SensorResource':
             self.addGETMethod(project_path, new_parent_filename, resource)
-        elif wottype == 'xwot:ActuatorResource':
+        elif wottype == 'xwot::ActuatorResource':
             self.addPUTMethod(project_path, new_parent_filename, resource)
-        elif wottype == 'xwot:ContextResource':
-            self.addGETMethod(project_path, new_parent_filename, resource)
-            self.addPUTMethod(project_path, new_parent_filename, resource)
-        elif wottype == 'xwot:Resource':
+        elif wottype == 'xwot::ContextResource':
             self.addGETMethod(project_path, new_parent_filename, resource)
             self.addPUTMethod(project_path, new_parent_filename, resource)
-        elif wottype == 'xwot:PublisherResource':
+        elif wottype == 'xwot::Resource':
+            self.addGETMethod(project_path, new_parent_filename, resource)
+            self.addPUTMethod(project_path, new_parent_filename, resource)
+        elif wottype == 'xwot::PublisherResource':
             resource['method'] = 'GET'
             self.addHTMLInfoTableBody(os.path.join(project_path, 'rest-documentation.html'), resource)
             resource['method'] = 'POST'
             self.addHTMLInfoTableBody(os.path.join(project_path, 'rest-documentation.html'), resource)
-        elif wottype == 'xwot:VResource':
+        elif wottype == 'xwot::VResource':
             self.addGETMethod(project_path, new_parent_filename, resource)
             self.addPUTMethod(project_path, new_parent_filename, resource)
             self.addPOSTMethod(project_path, new_parent_filename, resource)
@@ -266,7 +266,7 @@ class Model2Python:
             the full path + name of the created file
         """
         node_type = node.getAttribute('xsi:type')
-        if node_type == 'xwot:PublisherResource' and not self.__isNodeManager:
+        if node_type == 'xwot::PublisherResource' and not self.__isNodeManager:
             filein = open(project_path + '/publisher_skeleton.py')
         else:
             filein = open(project_path + '/resourceAPI_skeleton.py')
@@ -274,7 +274,7 @@ class Model2Python:
         classname = node.getAttribute('name').replace(" ", "") + "API"
         childSubstitute = '$child'
         importsubstitue = '$import'
-        if node_type == 'xwot:PublisherResource' and not self.__isNodeManager:
+        if node_type == 'xwot::PublisherResource' and not self.__isNodeManager:
             # set the childSubstitute for the *PublisherResourceAPI class
             if 'Publisher' in classname:
                 publisherclientclassname = classname.replace('Publisher', 'PublisherClient')
@@ -455,7 +455,7 @@ class Model2Python:
         if os.path.exists(output_dir):
             shutil.rmtree(output_dir)
         os.mkdir(output_dir)
-        entity = self.__model.getElementsByTagName('xwot:Entity')[0]
+        entity = self.__model.getElementsByTagName('xwot::Entity')[0]
         ve = self.__model.getElementsByTagName('VirtualEntity')[0]
         try:
             self.__log.info("Start processing")

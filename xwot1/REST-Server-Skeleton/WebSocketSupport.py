@@ -62,7 +62,7 @@ class HeartRateBroadcastFactory(WebSocketServerFactory):
             self.data.append(localdata)
             try:
                 json_data = json.loads(localdata)
-                # self.broadcast(str('{"xwot": %s, "timestamp": "%d"}'% (self.data[len(self.data)-1], time.time())))
+                # self.broadcast(str('{"xwot1": %s, "timestamp": "%d"}'% (self.data[len(self.data)-1], time.time())))
                 self.broadcast(str(
                     '{"temperature": {"@units": "celsisus","@precision": "2","#text": "%5.2f"},"humidity": {"@units": "celsisus","@precision": "2","#text": "%5.2f"}, "timestamp": "%d"}' % (
                         float(json_data['temperature']), float(json_data['humidity']), time.time())))

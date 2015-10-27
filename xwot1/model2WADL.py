@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # #############################################################################################################
-# Takes a xwot specification and creates a valid WADL file #
+# Takes a xwot1 specification and creates a valid WADL file #
 # ---------------------------------------------------------------------------------------------------------- #
 # #
 # Author: Andreas Ruppen                                                                                     #
